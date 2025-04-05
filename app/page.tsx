@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   ComposedChart,
   Line,
@@ -13,35 +13,24 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-} from "recharts";
-import { toPng } from "html-to-image";
+  DotProps,
+} from 'recharts';
+import { toPng } from 'html-to-image';
 
 // Move these to separate file
-function csvJSON(csv) {
-    var lines = csv.split("\n");
-
-    var result = [];
-
-    var headers = lines[0].split(",");
-
-    for (var i = 1; i < lines.length; i++) {
-
-        var obj = {};
-        var currentline = lines[i].split(",");
-
-        for (var j = 0; j < headers.length; j++) {
-			if (currentline[j] == "N/A") {
-				obj[headers[j]] = 0;
-			} else {
-				obj[headers[j]] = currentline[j];
-			}
-        }
-
-        result.push(obj);
-
+function csvJSON(csv: string) {
+  const lines = csv.split('\n');
+  const result: any[] = [];
+  const headers = lines[0].split(',');
+  for (let i = 1; i < lines.length; i++) {
+    const obj: any = {};
+    const currentline = lines[i].split(',');
+    for (let j = 0; j < headers.length; j++) {
+      obj[headers[j]] = currentline[j] === 'N/A' ? 0 : currentline[j];
     }
-
-    return result;
+    result.push(obj);
+  }
+  return result;
 }
 
 const aircraftCsv = `
@@ -79,7 +68,7 @@ GPY,P28A,C-G,1828.8,86.42,158047.7,80.5,118.1,142.8,N/A,95
 OLP,PA44,C-G,2653,86.13,228515.1,80.5,118.1,142.8,N/A,95
 MOP,PA44,C-G,2670.36,85.69,228822.74,80.5,118.1,142.8,N/A,95
 KUL,PA44,C-F,2674.02,85.59,228857.19,80.5,118.1,142.8,N/A,95
-`
+`;
 
 const modelCsv = `
 name,fuelRate,groundFuelRate,_fuel_cap,_fuel_cap2,mrw,mtow,mlw,utilityWeight,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,bag1Max,bag2Max,bagsMax,,,,,,,,,
@@ -93,37 +82,38 @@ DA40,10,1.5,51,50,2655,2646,2535,2161,94.5,1500,94.5,2161,97.6,2646,97.6,2646,97
 DA40AP,10,1.5,51,50,2544,2535,2407,2161,94.5,1500,94.5,2161,96.9,2535,96.9,2535,96.9,2535,96.9,2535,100.4,2535,94.5,1500,94.5,2161,94.5,2161,94.5,2161,94.5,2161,94.5,2161,100.4,2161,55,,,,100.00,40.00,100.00,94.5,2161,0.006417112,80.63262032,96.9,2535,0,2161,94.5
 P28A,12,1.4,77,72,2758,2750,2750,0,82,1500,82,2375,88.9,2750,88.9,2750,88.9,2750,88.9,2750,91.5,2750,0,0,0,0,0,0,0,0,0,0,0,0,0,0,56,4.96E+01,2.49E-02,0.00E+00,200.00,0.00,200.00,82,2375,0.0184,38.3,88.9,2750,0,0,0
 PA44,22,2.7,110,108,3816,3800,3800,0,84,2000,84,2800,85,3400,85,3400,85,3400,89,3800,93,3800,0,0,0,0,0,0,0,0,0,0,0,0,0,0,56,5.55E+01,2.09E-02,0.00E+00,200.00,0.00,200.00,0,0,0,0,0,0,0,0,0
-`
+`;
 
 const aircrafts = csvJSON(aircraftCsv.trim());
-for (var a of aircrafts) {
-	a.weight = Number(a.weight);
-	a.moment = Number(a.moment);
-	a.frontSeatArm = Number(a.frontSeatArm);
-	a.rearSeatArm = Number(a.rearSeatArm);
-	a.bag1Arm = Number(a.bag1Arm);
-	a.bag2Arm = Number(a.bag2Arm);
-	a.fuelArm = Number(a.fuelArm);
+for (const a of aircrafts) {
+  a.weight = Number(a.weight);
+  a.moment = Number(a.moment);
+  a.frontSeatArm = Number(a.frontSeatArm);
+  a.rearSeatArm = Number(a.rearSeatArm);
+  a.bag1Arm = Number(a.bag1Arm);
+  a.bag2Arm = Number(a.bag2Arm);
+  a.fuelArm = Number(a.fuelArm);
 }
 
 const models = csvJSON(modelCsv.trim());
-for (var m of models) {
-	for (var i in m) {
-		if (i != "name") {
-			m[i] = Number(m[i]);
-		} else {
-			m.noSpin = m[i] == "P28A" || m[i] == "PA44" || m[i] == "DA40" || m[i] ==" DA40AP" || m[i] == "DA40SR";
-		}
-	}
+for (const m of models) {
+  for (const i in m) {
+    if (i != 'name') {
+      m[i] = Number(m[i]);
+    } else {
+      m.noSpin =
+        m[i] == 'P28A' || m[i] == 'PA44' || m[i] == 'DA40' || m[i] == ' DA40AP' || m[i] == 'DA40SR';
+    }
+  }
 }
 // end move
 
-const SquareDot = (props: any) => {
+const SquareDot = (props: DotProps) => {
   const { cx, cy, stroke, strokeWidth } = props;
   return (
     <rect
-      x={cx - 4}
-      y={cy - 4}
+      x={(cx ?? 0) - 4}
+      y={(cy ?? 0) - 4}
       width={8}
       height={8}
       fill={stroke}
@@ -158,36 +148,50 @@ type GraphData = {
 };
 
 function lookupAircraft(reg: string) {
-	for (var a of aircrafts) {
-		if (reg == a.registration) {
-			return a;
-		}
-	}
-	// exception
+  for (const a of aircrafts) {
+    if (reg == a.registration) {
+      return a;
+    }
+  }
+  // exception
+  // TODO: FIX, NEEDED TO COMPILE
+  return {
+    registration: reg,
+    model: 'C152',
+    weight: 1150,
+    moment: 35062.11,
+    frontSeatArm: 39,
+    rearSeatArm: 64,
+    bag1Arm: 84,
+    bag2Arm: 42,
+    fuelArm: 42,
+  };
 }
 
-function lookupModel(aircraft) {
-	for (var m of models) {
-		if (aircraft.model == m.name) {
-			return m;
-		}
-	}
-	// exception
+// TODO: IMPLEMENT THIS
+function lookupModel(aircraft: any) {
+  for (const m of models) {
+    if (aircraft.model === m.name) {
+      return m;
+    }
+  }
+  // exception
+  return null;
 }
 
 export default function Home() {
   const [formData, setFormData] = useState<FormData>({
-    aircraftReg: "",
-    frontLeft: "",
-    frontRight: "",
-    rearLeft: "",
-    rearRight: "",
-    bag1: "",
-    bag2: "",
-    flightDuration: "",
-    startups: "",
-    fuelConsumption: "",
-    fuelLoaded: "",
+    aircraftReg: '',
+    frontLeft: '',
+    frontRight: '',
+    rearLeft: '',
+    rearRight: '',
+    bag1: '',
+    bag2: '',
+    flightDuration: '',
+    startups: '',
+    fuelConsumption: '',
+    fuelLoaded: '',
   });
   const [data, setData] = useState<GraphData[]>([]);
   const [showGraph, setShowGraph] = useState<boolean>(false);
@@ -196,82 +200,82 @@ export default function Home() {
   const calculateGraphData = (formData: FormData): GraphData => {
     const aircraft = lookupAircraft(formData.aircraftReg);
     const model = lookupModel(aircraft);
-	
-	const fuelLoaded = Number(formData.fuelLoaded);
-	const density = 6;
-	const fuelWeight = fuelLoaded * density;
-	const startTaxiFuel = Number(formData.startups) * model.groundFuelRate;
-	const tripFuel = Number(formData.flightDuration) * model.fuelRate;
-	const landingFuel = fuelLoaded - startTaxiFuel - tripFuel;
-	const reserveTime = 1;
-	const reserveFuel = reserveTime * model.fuelRate;
-	const minDepFuel = reserveFuel + startTaxiFuel + tripFuel;
-	const maxDepFuel = 1000; // TODO
-	const endurance = (fuelLoaded - startTaxiFuel) / model.fuelRate;
-	
-	// const va = ;
-	// const vref = ;
-	
-	const utilityMaxFuel = 1000; // TODO
-	// const timeToUtility = ;
-	
-	// WB
-	const weight = [
-		Number(formData.frontLeft) + Number(formData.frontRight),
-		Number(formData.rearLeft) + Number(formData.rearRight),
-		Number(formData.bag1),
-		Number(formData.bag2),
-		(fuelLoaded - startTaxiFuel) * density,
-	];
-	const arm = [
-		aircraft.frontSeatArm,
-		aircraft.rearSeatArm,
-		aircraft.bag1Arm,
-		aircraft.bag2Arm,
-		aircraft.fuelArm
-	];
-	let takeoffWeight = aircraft.weight;
-	for (var w of weight) {
-		takeoffWeight += w;
-	}
-	
-	let takeoffMoment = aircraft.moment;
-	for (let i = 0; i < weight.length; i++) {
-		takeoffMoment += weight[i] * arm[i];
-	}
-	
-	const takeoffArm = takeoffMoment / takeoffWeight;
-	const landingWeight = takeoffWeight - tripFuel * density;
-	const landingMoment = takeoffMoment - tripFuel * density * aircraft.fuelArm;
-	const landingArm = landingMoment / landingWeight;
-	
-	// flags
-	// const overMTOW
-	// const overMLW
-	const belowMinDepFuel = fuelLoaded < minDepFuel;
-	const bag1Over = formData.bag1 > model.bag1Max;
-	const bag2Over = formData.bag2 > model.bag2Max;
-	const bagsOver = formData.bag1 + formData.bag2 > model.bagsMax;
-	const maxFuelInsufficient = maxDepFuel < minDepFuel;
-	
-	//const normalCat = /*BJ20*/ > takeoffWeight && fuelLoaded > utilityMaxFuel && fuelLoaded <= maxDepFuel;
-	const utilityCat = takeoffWeight <= model.utilityWeight && fuelLoaded <= utilityMaxFuel;
-	const hasPassenger = weight[1] > 0 || weight[2] > 0 || weight[3] > 0; // todo name indices
-	const noSpin = model.noSpin || utilityMaxFuel < reserveFuel || hasPassenger;
-	
-	return {
-		cg: Number(formData.frontLeft) || 15,
-		landingWt: Number(formData.flightDuration)
-		  ? 1000 + Number(formData.flightDuration) * 10
-		  : 1000,
-		currentAc: Number(formData.flightDuration)
-		  ? 1100 - Number(formData.flightDuration) * 5
-		  : 1100,
-		normalMin: 1050,
-		normalMax: 1150,
-		utilityMin: 950,
-		utilityMax: 1000,
-	}
+
+    const fuelLoaded = Number(formData.fuelLoaded);
+    const density = 6;
+    const fuelWeight = fuelLoaded * density;
+    const startTaxiFuel = Number(formData.startups) * model.groundFuelRate;
+    const tripFuel = Number(formData.flightDuration) * model.fuelRate;
+    const landingFuel = fuelLoaded - startTaxiFuel - tripFuel;
+    const reserveTime = 1;
+    const reserveFuel = reserveTime * model.fuelRate;
+    const minDepFuel = reserveFuel + startTaxiFuel + tripFuel;
+    const maxDepFuel = 1000; // TODO
+    const endurance = (fuelLoaded - startTaxiFuel) / model.fuelRate;
+
+    // const va = ;
+    // const vref = ;
+
+    const utilityMaxFuel = 1000; // TODO
+    // const timeToUtility = ;
+
+    // WB
+    const weight = [
+      Number(formData.frontLeft) + Number(formData.frontRight),
+      Number(formData.rearLeft) + Number(formData.rearRight),
+      Number(formData.bag1),
+      Number(formData.bag2),
+      (fuelLoaded - startTaxiFuel) * density,
+    ];
+    const arm = [
+      aircraft.frontSeatArm,
+      aircraft.rearSeatArm,
+      aircraft.bag1Arm,
+      aircraft.bag2Arm,
+      aircraft.fuelArm,
+    ];
+    let takeoffWeight = aircraft.weight;
+    for (const w of weight) {
+      takeoffWeight += w;
+    }
+
+    let takeoffMoment = aircraft.moment;
+    for (let i = 0; i < weight.length; i++) {
+      takeoffMoment += weight[i] * arm[i];
+    }
+
+    const takeoffArm = takeoffMoment / takeoffWeight;
+    const landingWeight = takeoffWeight - tripFuel * density;
+    const landingMoment = takeoffMoment - tripFuel * density * aircraft.fuelArm;
+    const landingArm = landingMoment / landingWeight;
+
+    // flags
+    // const overMTOW
+    // const overMLW
+    const belowMinDepFuel = fuelLoaded < minDepFuel;
+    const bag1Over = formData.bag1 > model.bag1Max;
+    const bag2Over = formData.bag2 > model.bag2Max;
+    const bagsOver = formData.bag1 + formData.bag2 > model.bagsMax;
+    const maxFuelInsufficient = maxDepFuel < minDepFuel;
+
+    //const normalCat = /*BJ20*/ > takeoffWeight && fuelLoaded > utilityMaxFuel && fuelLoaded <= maxDepFuel;
+    const utilityCat = takeoffWeight <= model.utilityWeight && fuelLoaded <= utilityMaxFuel;
+    const hasPassenger = weight[1] > 0 || weight[2] > 0 || weight[3] > 0; // todo name indices
+    const noSpin = model.noSpin || utilityMaxFuel < reserveFuel || hasPassenger;
+
+    return {
+      cg: Number(formData.frontLeft) || 15,
+      landingWt: Number(formData.flightDuration)
+        ? 1000 + Number(formData.flightDuration) * 10
+        : 1000,
+      currentAc: Number(formData.flightDuration)
+        ? 1100 - Number(formData.flightDuration) * 5
+        : 1100,
+      normalMin: 1050,
+      normalMax: 1150,
+      utilityMin: 950,
+      utilityMax: 1000,
+    };
   };
   // ================================================
 
@@ -280,141 +284,181 @@ export default function Home() {
     setData([calculateGraphData(formData)]);
     setShowGraph(true);
     setFormData({
-      aircraftReg: "",
-      frontLeft: "",
-      frontRight: "",
-      rearLeft: "",
-      rearRight: "",
-      bag1: "",
-      bag2: "",
-      flightDuration: "",
-      startups: "",
-      fuelConsumption: "",
-      fuelLoaded: "",
+      aircraftReg: '',
+      frontLeft: '',
+      frontRight: '',
+      rearLeft: '',
+      rearRight: '',
+      bag1: '',
+      bag2: '',
+      flightDuration: '',
+      startups: '',
+      fuelConsumption: '',
+      fuelLoaded: '',
     });
   };
 
   const handleDownloadGraph = async () => {
-    const chart = document.getElementById("chart-container");
+    const chart = document.getElementById('chart-container');
     if (chart) {
-      toPng(chart, { backgroundColor: "white" })
+      toPng(chart, { backgroundColor: 'white' })
         .then((dataUrl) => {
-          const link = document.createElement("a");
-          link.download = "graph.png";
+          const link = document.createElement('a');
+          link.download = 'graph.png';
           link.href = dataUrl;
           link.click();
         })
         .catch((err) => {
-          console.error("oops, something went wrong!", err);
+          console.error('oops, something went wrong!', err);
         });
     }
-  };  
+  };
 
   return (
     <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-8 p-6 border rounded-2xl shadow-md">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-8 p-6 border rounded-2xl shadow-md"
+      >
+        {/* Step 1 */}
         <div className="flex flex-col gap-2">
-          <h3 className="text-lg font-bold">Step 1</h3>
-          <label htmlFor="aircraftReg" className="text-sm">
-            3-letter aircraft reg
-          </label>
+          <div className="flex flex-row items-center gap-2">
+            <h3 className="text-lg font-bold">Step 1</h3>
+            <span className="text-sm">3-letter aircraft reg</span>
+          </div>
           <Input
             id="aircraftReg"
             placeholder="e.g. ABC"
             maxLength={3}
-            className="border border-gray-800 rounded p-2"
+            className="w-full border border-gray-800 rounded p-2"
             value={formData.aircraftReg}
             onChange={(e) =>
               setFormData({ ...formData, aircraftReg: e.target.value.toUpperCase() })
             }
           />
         </div>
+        {/* Step 2 */}
         <div className="flex flex-col gap-4">
-          <h3 className="text-lg font-bold">Step 2</h3>
-          <label className="text-sm">Enter loading parameters</label>
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              type="number"
-              placeholder="Front Left"
-              className="border border-gray-800 rounded p-2"
-              value={formData.frontLeft}
-              onChange={(e) => setFormData({ ...formData, frontLeft: e.target.value })}
-            />
-            <Input
-              type="number"
-              placeholder="Front Right"
-              className="border border-gray-800 rounded p-2"
-              value={formData.frontRight}
-              onChange={(e) => setFormData({ ...formData, frontRight: e.target.value })}
-            />
+          <div className="flex flex-row items-center gap-2">
+            <h3 className="text-lg font-bold">Step 2</h3>
+            <span className="text-sm">Enter loading parameters</span>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              type="number"
-              placeholder="Rear Left"
-              className="border border-gray-800 rounded p-2"
-              value={formData.rearLeft}
-              onChange={(e) => setFormData({ ...formData, rearLeft: e.target.value })}
-            />
-            <Input
-              type="number"
-              placeholder="Rear Right"
-              className="border border-gray-800 rounded p-2"
-              value={formData.rearRight}
-              onChange={(e) => setFormData({ ...formData, rearRight: e.target.value })}
-            />
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Front Left</label>
+              <Input
+                type="number"
+                placeholder="Front Left"
+                className="w-full border border-gray-800 rounded p-2"
+                value={formData.frontLeft}
+                onChange={(e) => setFormData({ ...formData, frontLeft: e.target.value })}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Front Right</label>
+              <Input
+                type="number"
+                placeholder="Front Right"
+                className="w-full border border-gray-800 rounded p-2"
+                value={formData.frontRight}
+                onChange={(e) => setFormData({ ...formData, frontRight: e.target.value })}
+              />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              type="number"
-              placeholder="Bag 1"
-              className="border border-gray-800 rounded p-2"
-              value={formData.bag1}
-              onChange={(e) => setFormData({ ...formData, bag1: e.target.value })}
-            />
-            <Input
-              type="number"
-              placeholder="Bag 2"
-              className="border border-gray-800 rounded p-2"
-              value={formData.bag2}
-              onChange={(e) => setFormData({ ...formData, bag2: e.target.value })}
-            />
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Rear Left</label>
+              <Input
+                type="number"
+                placeholder="Rear Left"
+                className="w-full border border-gray-800 rounded p-2"
+                value={formData.rearLeft}
+                onChange={(e) => setFormData({ ...formData, rearLeft: e.target.value })}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Rear Right</label>
+              <Input
+                type="number"
+                placeholder="Rear Right"
+                className="w-full border border-gray-800 rounded p-2"
+                value={formData.rearRight}
+                onChange={(e) => setFormData({ ...formData, rearRight: e.target.value })}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Bag 1</label>
+              <Input
+                type="number"
+                placeholder="Bag 1"
+                className="w-full border border-gray-800 rounded p-2"
+                value={formData.bag1}
+                onChange={(e) => setFormData({ ...formData, bag1: e.target.value })}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Bag 2</label>
+              <Input
+                type="number"
+                placeholder="Bag 2"
+                className="w-full border border-gray-800 rounded p-2"
+                value={formData.bag2}
+                onChange={(e) => setFormData({ ...formData, bag2: e.target.value })}
+              />
+            </div>
           </div>
         </div>
+        {/* Step 3 */}
         <div className="flex flex-col gap-4">
-          <h3 className="text-lg font-bold">Step 3</h3>
-          <label className="text-sm">Flight parameters</label>
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              type="number"
-              placeholder="Flight duration (hrs)"
-              className="border border-gray-800 rounded p-2"
-              value={formData.flightDuration}
-              onChange={(e) => setFormData({ ...formData, flightDuration: e.target.value })}
-            />
-            <Input
-              type="number"
-              placeholder="Number of startups"
-              className="border border-gray-800 rounded p-2"
-              value={formData.startups}
-              onChange={(e) => setFormData({ ...formData, startups: e.target.value })}
-            />
+          <div className="flex flex-row items-center gap-2">
+            <h3 className="text-lg font-bold">Step 3</h3>
+            <span className="text-sm">Flight parameters</span>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              type="number"
-              placeholder="Fuel consumption (gph)"
-              className="border border-gray-800 rounded p-2"
-              value={formData.fuelConsumption}
-              onChange={(e) => setFormData({ ...formData, fuelConsumption: e.target.value })}
-            />
-            <Input
-              type="number"
-              placeholder="Fuel loaded (optional)"
-              className="border border-gray-800 rounded p-2"
-              value={formData.fuelLoaded}
-              onChange={(e) => setFormData({ ...formData, fuelLoaded: e.target.value })}
-            />
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Flight duration (hrs)</label>
+              <Input
+                type="number"
+                placeholder="Flight duration (hrs)"
+                className="w-full border border-gray-800 rounded p-2"
+                value={formData.flightDuration}
+                onChange={(e) => setFormData({ ...formData, flightDuration: e.target.value })}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Number of startups</label>
+              <Input
+                type="number"
+                placeholder="Number of startups"
+                className="w-full border border-gray-800 rounded p-2"
+                value={formData.startups}
+                onChange={(e) => setFormData({ ...formData, startups: e.target.value })}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Fuel consumption (gph)</label>
+              <Input
+                type="number"
+                placeholder="Fuel consumption (gph)"
+                className="w-full border border-gray-800 rounded p-2"
+                value={formData.fuelConsumption}
+                onChange={(e) => setFormData({ ...formData, fuelConsumption: e.target.value })}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Fuel loaded (optional)</label>
+              <Input
+                type="number"
+                placeholder="Fuel loaded (optional)"
+                className="w-full border border-gray-800 rounded p-2"
+                value={formData.fuelLoaded}
+                onChange={(e) => setFormData({ ...formData, fuelLoaded: e.target.value })}
+              />
+            </div>
           </div>
         </div>
         <Button type="submit" className="mt-4">
@@ -428,16 +472,67 @@ export default function Home() {
             <ResponsiveContainer width="100%" height={300}>
               <ComposedChart data={data}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="cg" label={{ value: "C.G. (inches aft of datum)", position: "insideBottom", offset: -5 }} />
-                <YAxis label={{ value: "Weight (lbs)", angle: -90, position: "insideLeft" }} />
+                <XAxis
+                  dataKey="cg"
+                  label={{
+                    value: 'C.G. (inches aft of datum)',
+                    position: 'insideBottom',
+                    offset: -5,
+                  }}
+                />
+                <YAxis label={{ value: 'Weight (lbs)', angle: -90, position: 'insideLeft' }} />
                 <Tooltip />
                 <Legend />
-                <Area type="monotone" dataKey="normalMax" stroke="none" fill="lightblue" fillOpacity={0.3} stackId="normal" />
-                <Area type="monotone" dataKey="normalMin" stroke="none" fill="white" fillOpacity={1} stackId="normal" />
-                <Area type="monotone" dataKey="utilityMax" stroke="none" fill="lightgreen" fillOpacity={0.3} stackId="utility" />
-                <Area type="monotone" dataKey="utilityMin" stroke="none" fill="white" fillOpacity={1} stackId="utility" />
-                <Line type="monotone" dataKey="landingWt" stroke="#FFA500" strokeDasharray="5 5" strokeLinecap="square" dot={<SquareDot />} name="Landing Wt" />
-                <Line type="monotone" dataKey="currentAc" stroke="#FF0000" strokeDasharray="5 5" strokeLinecap="square" dot={<SquareDot />} name="Current a/c" />
+                <Area
+                  type="monotone"
+                  dataKey="normalMax"
+                  stroke="none"
+                  fill="lightblue"
+                  fillOpacity={0.3}
+                  stackId="normal"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="normalMin"
+                  stroke="none"
+                  fill="white"
+                  fillOpacity={1}
+                  stackId="normal"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="utilityMax"
+                  stroke="none"
+                  fill="lightgreen"
+                  fillOpacity={0.3}
+                  stackId="utility"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="utilityMin"
+                  stroke="none"
+                  fill="white"
+                  fillOpacity={1}
+                  stackId="utility"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="landingWt"
+                  stroke="#FFA500"
+                  strokeDasharray="5 5"
+                  strokeLinecap="square"
+                  dot={<SquareDot />}
+                  name="Landing Wt"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="currentAc"
+                  stroke="#FF0000"
+                  strokeDasharray="5 5"
+                  strokeLinecap="square"
+                  dot={<SquareDot />}
+                  name="Current a/c"
+                />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
