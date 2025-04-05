@@ -71,17 +71,17 @@ KUL,PA44,C-F,2674.02,85.59,228857.19,80.5,118.1,142.8,N/A,95
 `;
 
 const modelCsv = `
-name,fuelRate,groundFuelRate,_fuel_cap,_fuel_cap2,mrw,mtow,mlw,utilityWeight,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,bag1Max,bag2Max,bagsMax,,,,,,,,,
-C152,6,0.8,26,24.5,1674.8,1670,1670,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,43,6.04E+01,1.59E-02,6.13E-06,120.00,40.00,120.00,31,1350,5.16E-03,2.40E+01,32.65,1670,5.16E-03,2.40E+01,36.5
-C152LR,6,0.8,39,37.5,1674.8,1670,1670,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,43,6.04E+01,1.59E-02,6.13E-06,120.00,40.00,120.00,31,1350,5.16E-03,2.40E+01,32.65,1670,5.16E-03,2.40E+01,36.5
-A152,6,0.8,26,24.5,1674.8,1670,1670,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,43,1.08E+02,0.00E+00,0.00E+00,120.00,40.00,120.00,31,1350,5.16E-03,2.40E+01,32.65,1670,5.16E-03,2.40E+01,36.5
-C172N,10,1.4,54,50,2308,2300,2300,2000,35,1500,35,1950,35.5,2000,38.5,2300,40.5,2300,40.5,2300,47.3,2300,35,1500,35,1950,35.5,2000,38.5,2000,40.5,2000,40.5,0,47.3,0,50,2.61E+01,4.02E-02,-4.08E-06,120.00,50.00,120.00,35,1950,0.015714286,4.357142857,40.5,2300,0.015714286,4.357142857,40.5
-C172S,10,1.4,56,53,2558,2550,2550,2200,35,1500,35,1950,37.5,2200,40.5,2500,40.5,2500,41,2550,47.3,2550,35,1500,35,1950,37.5,2200,40.5,2200,40.5,0,41,0,47.3,0,48,-3.54E+00,6.87E-02,-1.03E-05,120.00,50.00,120.00,35,1950,1.00E-02,15.5,41,2550,1.00E-02,15.5,40.5
-DA40SR,10,1.5,41.2,40.2,2655,2646,2407,2161,94.5,1500,94.5,2161,97.6,2646,97.6,2646,97.6,2646,97.6,2646,102,2646,94.5,1500,94.5,2161,94.5,2161,94.5,2161,94.5,2161,94.5,2161,102,2161,55,,,,100.00,40.00,100.00,94.5,2161,0.006391753,80.68742268,97.6,2646,0,2161,94.5
-DA40,10,1.5,51,50,2655,2646,2535,2161,94.5,1500,94.5,2161,97.6,2646,97.6,2646,97.6,2646,97.6,2646,100.4,2646,94.5,1500,94.5,2161,94.5,2161,94.5,2161,94.5,2161,94.5,2161,100.4,2161,55,,,,100.00,40.00,100.00,94.5,2161,0.006391753,80.68742268,97.6,2646,0,2161,94.5
-DA40AP,10,1.5,51,50,2544,2535,2407,2161,94.5,1500,94.5,2161,96.9,2535,96.9,2535,96.9,2535,96.9,2535,100.4,2535,94.5,1500,94.5,2161,94.5,2161,94.5,2161,94.5,2161,94.5,2161,100.4,2161,55,,,,100.00,40.00,100.00,94.5,2161,0.006417112,80.63262032,96.9,2535,0,2161,94.5
-P28A,12,1.4,77,72,2758,2750,2750,0,82,1500,82,2375,88.9,2750,88.9,2750,88.9,2750,88.9,2750,91.5,2750,0,0,0,0,0,0,0,0,0,0,0,0,0,0,56,4.96E+01,2.49E-02,0.00E+00,200.00,0.00,200.00,82,2375,0.0184,38.3,88.9,2750,0,0,0
-PA44,22,2.7,110,108,3816,3800,3800,0,84,2000,84,2800,85,3400,85,3400,85,3400,89,3800,93,3800,0,0,0,0,0,0,0,0,0,0,0,0,0,0,56,5.55E+01,2.09E-02,0.00E+00,200.00,0.00,200.00,0,0,0,0,0,0,0,0,0
+name,fuelRate,groundFuelRate,fuelCap,_fuel_cap2,mrw,mtow,mlw,utilityWeight,normalX0,normalY0,normalX1,normalY1,normalX2,normalY2,normalX3,normalY3,normalX4,normalY4,normalX5,normalY5,normalX6,normalY6,,,,,,,,,,,,,,,,,,,bag1Max,bag2Max,bagsMax,,,,,,,,,
+C152,6,0.8,26,24.5,1674.8,1670,1670,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,43,6.04E+01,1.59E-02,6.13E-06,120,40,120,31,1350,5.16E-03,2.40E+01,32.65,1670,5.16E-03,2.40E+01,36.5
+C152LR,6,0.8,39,37.5,1674.8,1670,1670,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,43,6.04E+01,1.59E-02,6.13E-06,120,40,120,31,1350,5.16E-03,2.40E+01,32.65,1670,5.16E-03,2.40E+01,36.5
+A152,6,0.8,26,24.5,1674.8,1670,1670,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,43,1.08E+02,0.00E+00,0.00E+00,120,40,120,31,1350,5.16E-03,2.40E+01,32.65,1670,5.16E-03,2.40E+01,36.5
+C172N,10,1.4,54,50,2308,2300,2300,2000,35,1500,35,1950,35.5,2000,38.5,2300,40.5,2300,40.5,2300,47.3,2300,35,1500,35,1950,35.5,2000,38.5,2000,40.5,2000,40.5,0,47.3,0,50,2.61E+01,4.02E-02,-4.08E-06,120,50,120,35,1950,0.015714286,4.357142857,40.5,2300,0.015714286,4.357142857,40.5
+C172S,10,1.4,56,53,2558,2550,2550,2200,35,1500,35,1950,37.5,2200,40.5,2500,40.5,2500,41,2550,47.3,2550,35,1500,35,1950,37.5,2200,40.5,2200,40.5,0,41,0,47.3,0,48,-3.54E+00,6.87E-02,-1.03E-05,120,50,120,35,1950,1.00E-02,15.5,41,2550,1.00E-02,15.5,40.5
+DA40SR,10,1.5,41.2,40.2,2655,2646,2407,2161,94.5,1500,94.5,2161,97.6,2646,97.6,2646,97.6,2646,97.6,2646,102,2646,94.5,1500,94.5,2161,94.5,2161,94.5,2161,94.5,2161,94.5,2161,102,2161,55,,,,100,40,100,94.5,2161,0.006391753,80.68742268,97.6,2646,0,2161,94.5
+DA40,10,1.5,51,50,2655,2646,2535,2161,94.5,1500,94.5,2161,97.6,2646,97.6,2646,97.6,2646,97.6,2646,100.4,2646,94.5,1500,94.5,2161,94.5,2161,94.5,2161,94.5,2161,94.5,2161,100.4,2161,55,,,,100,40,100,94.5,2161,0.006391753,80.68742268,97.6,2646,0,2161,94.5
+DA40AP,10,1.5,51,50,2544,2535,2407,2161,94.5,1500,94.5,2161,96.9,2535,96.9,2535,96.9,2535,96.9,2535,100.4,2535,94.5,1500,94.5,2161,94.5,2161,94.5,2161,94.5,2161,94.5,2161,100.4,2161,55,,,,100,40,100,94.5,2161,0.006417112,80.63262032,96.9,2535,0,2161,94.5
+P28A,12,1.4,77,72,2758,2750,2750,0,82,1500,82,2375,88.9,2750,88.9,2750,88.9,2750,88.9,2750,91.5,2750,0,0,0,0,0,0,0,0,0,0,0,0,0,0,56,4.96E+01,2.49E-02,0.00E+00,200,0,200,82,2375,0.0184,38.3,88.9,2750,0,0,0
+PA44,22,2.7,110,108,3816,3800,3800,0,84,2000,84,2800,85,3400,85,3400,85,3400,89,3800,93,3800,0,0,0,0,0,0,0,0,0,0,0,0,0,0,56,5.55E+01,2.09E-02,0.00E+00,200,0,200,0,0,0,0,0,0,0,0,0
 `;
 
 const aircrafts = csvJSON(aircraftCsv.trim());
@@ -105,7 +105,23 @@ for (const m of models) {
         m[i] == 'P28A' || m[i] == 'PA44' || m[i] == 'DA40' || m[i] == ' DA40AP' || m[i] == 'DA40SR';
     }
   }
+  updateModel(m);
 }
+
+function updateModel(m) {
+  switch (m.name) {
+    case 'C152':
+    case 'A152':
+    case 'C152LR':
+      m.normalCg = [
+        { x: 31, y: 1350 },
+        { x: 32.65, y: 1670 },
+        { x: 36.5, y: 1670 },
+      ];
+      break;
+  }
+}
+
 // end move
 
 const SquareDot = (props: DotProps) => {
@@ -179,6 +195,62 @@ function lookupModel(aircraft: any) {
   return null;
 }
 
+function linearConstraints(points, x: number, y: number): boolean {
+  if (x < points[0].x || x > points[points.lenght - 1]) {
+    return false;
+  }
+
+  for (let i = 0; i < points.length - 1; i++) {
+    if (x >= points[i].x && x <= points[i + 1].x) {
+      const slope = (points[i + 1].y - points[i].y) / (points[i + 1].x - points[i].x);
+      const intercept = points[i].y - points[i].x * slope;
+      return y <= slope * x + intercept;
+    }
+  }
+  // can't get here
+  return false;
+}
+
+type ObjectiveFunction = (x: number) => [number, number];
+type ConstraintFunction = (y0: number, y1: number) => boolean;
+
+function constrainedOptimization(
+  objective: ObjectiveFunction,
+  constraint: ConstraintFunction,
+  max: number
+): { x: number; y0: number; y1: number } | null {
+  let bestX: number | null = null;
+  let bestY0: number | null = null;
+  let bestY1: number | null = null;
+  let min = 0;
+
+  // Binary search for the optimal x
+  while (min <= max) {
+    const mid = (min + max) / 2;
+    const [y0, y1] = objective(mid);
+
+    if (constraint(y0, y1)) {
+      // Update best found values
+      if (bestY0 === null || y0 > bestY0) {
+        bestY0 = y0;
+        bestY1 = y1;
+        bestX = mid;
+      }
+      // Since the function is monotonically increasing, search in the right half
+      min = mid + 0.01; // Move to the right
+    } else {
+      // Search in the left half
+      max = mid - 0.01; // Move to the left
+    }
+  }
+
+  if (bestX !== null && bestY0 !== null) {
+    return { x: bestX, y0: bestY0, y1: bestY1 };
+  }
+
+  return null; // No valid solution found
+}
+
 export default function Home() {
   const [formData, setFormData] = useState<FormData>({
     aircraftReg: '',
@@ -200,7 +272,6 @@ export default function Home() {
   const calculateGraphData = (formData: FormData): GraphData => {
     const aircraft = lookupAircraft(formData.aircraftReg);
     const model = lookupModel(aircraft);
-
     const fuelLoaded = Number(formData.fuelLoaded);
     const density = 6;
     const fuelWeight = fuelLoaded * density;
@@ -210,7 +281,6 @@ export default function Home() {
     const reserveTime = 1;
     const reserveFuel = reserveTime * model.fuelRate;
     const minDepFuel = reserveFuel + startTaxiFuel + tripFuel;
-    const maxDepFuel = 1000; // TODO
     const endurance = (fuelLoaded - startTaxiFuel) / model.fuelRate;
 
     // const va = ;
@@ -235,7 +305,7 @@ export default function Home() {
       aircraft.fuelArm,
     ];
     let takeoffWeight = aircraft.weight;
-    for (const w of weight) {
+    for (var w of weight) {
       takeoffWeight += w;
     }
 
@@ -248,6 +318,22 @@ export default function Home() {
     const landingWeight = takeoffWeight - tripFuel * density;
     const landingMoment = takeoffMoment - tripFuel * density * aircraft.fuelArm;
     const landingArm = landingMoment / landingWeight;
+
+    const { x, y0, y1 } = constrainedOptimization(
+      (fuel: number) => {
+        const weight = fuel * density + takeoffWeight - fuelWeight;
+        const moment = takeoffMoment + (fuel * density - fuelWeight) * aircraft.fuelArm;
+        const arm = moment / weight;
+        return [arm, weight];
+      },
+      (arm: number, weight: number) => {
+        return linearConstraints(model.normalCg, arm, weight);
+      },
+      model.fuelCap
+    );
+    const maxDepFuel = x;
+    const maxArm = y0;
+    const maxWeight = y1;
 
     // flags
     // const overMTOW
@@ -283,19 +369,6 @@ export default function Home() {
     e.preventDefault();
     setData([calculateGraphData(formData)]);
     setShowGraph(true);
-    setFormData({
-      aircraftReg: '',
-      frontLeft: '',
-      frontRight: '',
-      rearLeft: '',
-      rearRight: '',
-      bag1: '',
-      bag2: '',
-      flightDuration: '',
-      startups: '',
-      fuelConsumption: '',
-      fuelLoaded: '',
-    });
   };
 
   const handleDownloadGraph = async () => {
