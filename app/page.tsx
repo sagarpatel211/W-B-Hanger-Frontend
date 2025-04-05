@@ -118,6 +118,31 @@ function updateModel(m) {
         { x: 32.65, y: 1670 },
         { x: 36.5, y: 1670 },
       ];
+      m.utilityCg = m.normalCg;
+      break;
+    case 'C172N':
+      m.normalCg = [
+        { x: 35, y: 1950 },
+        { x: 38.5, y: 2300 },
+        { x: 47.3, y: 2300 },
+      ];
+      m.utilityCg = [
+        { x: 35, y: 1950 },
+        { x: 35.5, y: 2000 },
+        { x: 40.5, y: 2000 },
+      ];
+      break;
+    case 'C172S':
+      m.normalCg = [
+        { x: 35, y: 1950 },
+        { x: 41, y: 2550 },
+        { x: 47.3, y: 2550 },
+      ];
+      m.utilityCg = [
+        { x: 35, y: 1950 },
+        { x: 37.5, y: 2200 },
+        { x: 40.5, y: 2200 },
+      ];
       break;
   }
 }
@@ -286,9 +311,6 @@ export default function Home() {
     // const va = ;
     // const vref = ;
 
-    const utilityMaxFuel = 1000; // TODO
-    // const timeToUtility = ;
-
     // WB
     const weight = [
       Number(formData.frontLeft) + Number(formData.frontRight),
@@ -319,7 +341,7 @@ export default function Home() {
     const landingMoment = takeoffMoment - tripFuel * density * aircraft.fuelArm;
     const landingArm = landingMoment / landingWeight;
 
-    const { x, y0, y1 } = constrainedOptimization(
+    var opt = constrainedOptimization(
       (fuel: number) => {
         const weight = fuel * density + takeoffWeight - fuelWeight;
         const moment = takeoffMoment + (fuel * density - fuelWeight) * aircraft.fuelArm;
@@ -331,9 +353,26 @@ export default function Home() {
       },
       model.fuelCap
     );
-    const maxDepFuel = x;
-    const maxArm = y0;
-    const maxWeight = y1;
+    const maxDepFuel = opt.x;
+    const maxArm = opt.y0;
+    const maxWeight = opt.y1;
+
+    opt = constrainedOptimization(
+      (fuel: number) => {
+        const weight = fuel * density + takeoffWeight - fuelWeight;
+        const moment = takeoffMoment + (fuel * density - fuelWeight) * aircraft.fuelArm;
+        const arm = moment / weight;
+        return [arm, weight];
+      },
+      (arm: number, weight: number) => {
+        return linearConstraints(model.utilityCg, arm, weight);
+      },
+      model.fuelCap
+    );
+    const utilityMaxFuel = opt.x;
+    const utilityMaxArm = opt.y0;
+    const utilityMaxWeight = opt.y1;
+    const timeToUtility = Math.max((fuelLoaded - utilityMaxFuel) / model.fuelRate, 0);
 
     // flags
     // const overMTOW
