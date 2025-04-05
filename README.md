@@ -1,5 +1,8 @@
 # W-B-Hanger-Frontend
 
+## Preview
+![Preview](./preview.png)
+
 ## Steps for Development
 
 1. `cd W-B-Hanger-Frontend`
