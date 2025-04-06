@@ -71,7 +71,7 @@ KUL,PA44,C-F,2674.02,85.59,228857.19,80.5,118.1,142.8,N/A,95
 `;
 
 const modelCsv = `
-name,fuelRate,groundFuelRate,fuelCap,_fuel_cap2,mrw,mtow,mlw,utilityWeight,normalX0,normalY0,normalX1,normalY1,normalX2,normalY2,normalX3,normalY3,normalX4,normalY4,normalX5,normalY5,normalX6,normalY6,,,,,,,,,,,,,,,,,,,bag1Max,bag2Max,bagsMax,,,,,,,,,
+name,fuelRate,groundFuelRate,fuelCap,_fuel_cap2,mrw,mtow,mlw,utilityWeight,normalX0,normalY0,normalX1,normalY1,normalX2,normalY2,normalX3,normalY3,normalX4,normalY4,normalX5,normalY5,normalX6,normalY6,,,,,,,,,,,,,,,vso,va1,va2,va3,bag1Max,bag2Max,bagsMax,,,,,,,,,
 C152,6,0.8,26,24.5,1674.8,1670,1670,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,43,6.04E+01,1.59E-02,6.13E-06,120,40,120,31,1350,5.16E-03,2.40E+01,32.65,1670,5.16E-03,2.40E+01,36.5
 C152LR,6,0.8,39,37.5,1674.8,1670,1670,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,43,6.04E+01,1.59E-02,6.13E-06,120,40,120,31,1350,5.16E-03,2.40E+01,32.65,1670,5.16E-03,2.40E+01,36.5
 A152,6,0.8,26,24.5,1674.8,1670,1670,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,31,1100,31,1350,31,1350,31,1350,32.65,1670,32.65,1670,36.5,1670,43,1.08E+02,0.00E+00,0.00E+00,120,40,120,31,1350,5.16E-03,2.40E+01,32.65,1670,5.16E-03,2.40E+01,36.5
@@ -143,6 +143,37 @@ function updateModel(m) {
         { x: 37.5, y: 2200 },
         { x: 40.5, y: 2200 },
       ];
+      break;
+  }
+
+  switch (m.name) {
+    case 'DA40SR':
+    case 'DA40':
+      m.va = (weight: number): number => {
+        if (weight > 2284 && weight < 2646) {
+          return 111;
+        } else if (weight > 1720 && weight <= 2284) {
+          return 94;
+        } else {
+          return 0;
+        }
+      };
+      break;
+    case 'DA40AP':
+      m.va = (weight: number): number => {
+        if (weight > 2161 && weight < 2535) {
+          return 108;
+        } else if (weight > 1720 && weight <= 2161) {
+          return 94;
+        } else {
+          return 0;
+        }
+      };
+      break;
+    default:
+      m.va = (weight: number): number => {
+        return m.va1 + m.va2 * weight + m.va3 * weight * weight;
+      };
       break;
   }
 }
@@ -308,9 +339,6 @@ export default function Home() {
     const minDepFuel = reserveFuel + startTaxiFuel + tripFuel;
     const endurance = (fuelLoaded - startTaxiFuel) / model.fuelRate;
 
-    // const va = ;
-    // const vref = ;
-
     // WB
     const weight = [
       Number(formData.frontLeft) + Number(formData.frontRight),
@@ -341,6 +369,9 @@ export default function Home() {
     const landingMoment = takeoffMoment - tripFuel * density * aircraft.fuelArm;
     const landingArm = landingMoment / landingWeight;
 
+    const va = model.va(takeoffWeight);
+    const vref = 1.3 * model.vso * Math.sqrt(landingWeight / model.mtow);
+
     var opt = constrainedOptimization(
       (fuel: number) => {
         const weight = fuel * density + takeoffWeight - fuelWeight;
@@ -353,9 +384,9 @@ export default function Home() {
       },
       model.fuelCap
     );
-    const maxDepFuel = opt.x;
-    const maxArm = opt.y0;
-    const maxWeight = opt.y1;
+    const maxDepFuel = opt == null ? null : opt.x;
+    const maxArm = opt == null ? null : opt.y0;
+    const maxWeight = opt == null ? null : opt.y1;
 
     opt = constrainedOptimization(
       (fuel: number) => {
@@ -369,24 +400,28 @@ export default function Home() {
       },
       model.fuelCap
     );
-    const utilityMaxFuel = opt.x;
-    const utilityMaxArm = opt.y0;
-    const utilityMaxWeight = opt.y1;
-    const timeToUtility = Math.max((fuelLoaded - utilityMaxFuel) / model.fuelRate, 0);
+    const utilityMaxFuel = opt == null ? null : opt.x;
+    const utilityMaxArm = opt == null ? null : opt.y0;
+    const utilityMaxWeight = opt == null ? null : opt.y1;
+    const timeToUtility =
+      opt == null ? null : Math.max((fuelLoaded - utilityMaxFuel) / model.fuelRate, 0);
 
     // flags
-    // const overMTOW
-    // const overMLW
     const belowMinDepFuel = fuelLoaded < minDepFuel;
     const bag1Over = formData.bag1 > model.bag1Max;
     const bag2Over = formData.bag2 > model.bag2Max;
     const bagsOver = formData.bag1 + formData.bag2 > model.bagsMax;
-    const maxFuelInsufficient = maxDepFuel < minDepFuel;
+    const maxFuelInsufficient = maxDepFuel == null ? true : maxDepFuel < minDepFuel;
 
-    //const normalCat = /*BJ20*/ > takeoffWeight && fuelLoaded > utilityMaxFuel && fuelLoaded <= maxDepFuel;
-    const utilityCat = takeoffWeight <= model.utilityWeight && fuelLoaded <= utilityMaxFuel;
+    const utilityCat = linearConstraints(model.utilityCg, takeoffArm, takeoffWeight);
+    const normalCat = !utilityCat && linearConstraints(model.normalCg, takeoffArm, takeoffWeight);
+
+    const overMTOW = !normalCat && !utilityCat && takeoffWeight > model.mtow;
+    const overMLW = !normalCat && !utilityCat && landingWeight > model.mlw;
+
     const hasPassenger = weight[1] > 0 || weight[2] > 0 || weight[3] > 0; // todo name indices
-    const noSpin = model.noSpin || utilityMaxFuel < reserveFuel || hasPassenger;
+    const noSpin =
+      utilityMaxFuel == null ? true : model.noSpin || utilityMaxFuel < reserveFuel || hasPassenger;
 
     return {
       cg: Number(formData.frontLeft) || 15,
