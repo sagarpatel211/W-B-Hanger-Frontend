@@ -144,6 +144,56 @@ function updateModel(m) {
         { x: 40.5, y: 2200 },
       ];
       break;
+    case 'DA40SR':
+      m.normalCg = [
+        { x: 94.5, y: 2161 },
+        { x: 97.6, y: 2646 },
+        { x: 102, y: 2646 },
+      ];
+      m.utilityCg = [
+        { x: 94.5, y: 2161 },
+        { x: 102, y: 2161 },
+      ];
+	  break;
+    case 'DA40':
+      m.normalCg = [
+        { x: 94.5, y: 2161 },
+        { x: 97.6, y: 2646 },
+        { x: 100.4, y: 2646 },
+      ];
+      m.utilityCg = [
+        { x: 94.5, y: 2161 },
+        { x: 100.4, y: 2161 },
+      ];
+	  break;
+    case 'DA40AP':
+      m.normalCg = [
+        { x: 94.5, y: 2161 },
+        { x: 96.9, y: 2535 },
+        { x: 100.4, y: 2535 },
+      ];
+      m.utilityCg = [
+        { x: 94.5, y: 2161 },
+        { x: 100.4, y: 2161 },
+      ];
+	  break;
+    case 'P28A':
+      m.normalCg = [
+        { x: 82, y: 2375 },
+        { x: 88.9, y: 2750 },
+        { x: 91.5, y: 2750 },
+      ];
+      m.utilityCg = [{ x: 0, y: 0 }];
+	  break;
+    case 'PA44':
+      m.normalCg = [
+        { x: 84, y: 2800 },
+        { x: 85, y: 3400 },
+        { x: 89, y: 3800 },
+        { x: 93, y: 3800 },
+      ];
+      m.utilityCg = [{ x: 0, y: 0 }];
+	  break;
   }
 
   switch (m.name) {
