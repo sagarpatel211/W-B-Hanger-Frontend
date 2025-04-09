@@ -7,6 +7,10 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-dm-sans)', 'sans-serif'],
       },
+      colors: {
+        background: '#ffffff',
+        foreground: '#000000',
+      },
     },
   },
   plugins: [],
