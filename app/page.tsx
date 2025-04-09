@@ -271,6 +271,7 @@ type GraphData = {
   points: { name: string; x: number; y: number }[];
   normalEnvelope: { x: number; y: number }[];
   utilityEnvelope: { x: number; y: number }[];
+  extraInfo?: any;
 };
 
 function lookupAircraft(reg: string) {
@@ -486,6 +487,34 @@ export default function Home() {
       ],
       normalEnvelope: model.normalCg,
       utilityEnvelope: model.utilityCg,
+      extraInfo: {
+        model,
+        takeoffWeight,
+        landingWeight,
+        takeoffArm,
+        landingArm,
+        va,
+        vref,
+        maxDepFuel,
+        maxArm,
+        maxWeight,
+        utilityMaxFuel,
+        utilityMaxArm,
+        utilityMaxWeight,
+        timeToUtility,
+        belowMinDepFuel,
+        bag1Over,
+        bag2Over,
+        bagsOver,
+        maxFuelInsufficient,
+        utilityCat,
+        normalCat,
+        overMTOW,
+        overMLW,
+        noSpin,
+        endurance,
+        minDepFuel,
+      },
     };
   };
   // ================================================
@@ -721,6 +750,147 @@ export default function Home() {
                 ))}
               </ComposedChart>
             </ResponsiveContainer>
+            {data[0]?.extraInfo && (
+              <div className="mt-6 space-y-6 text-sm">
+                {/* Fuel Table */}
+                <table className="w-full border border-black text-left">
+                  <thead>
+                    <tr>
+                      <th className="border px-2 py-1">Fuel</th>
+                      <th className="border px-2 py-1">Gal</th>
+                      <th className="border px-2 py-1">Lbs</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border px-2 py-1">Fuel Loaded</td>
+                      <td className="border px-2 py-1">{Number(formData.fuelLoaded).toFixed(2)}</td>
+                      <td className="border px-2 py-1">
+                        {(Number(formData.fuelLoaded) * 6).toFixed(2)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border px-2 py-1">Start/Taxi</td>
+                      <td className="border px-2 py-1">
+                        {(
+                          Number(formData.startups) * data[0].extraInfo.model.groundFuelRate
+                        ).toFixed(2)}
+                      </td>
+                      <td className="border px-2 py-1">
+                        {(
+                          Number(formData.startups) *
+                          data[0].extraInfo.model.groundFuelRate *
+                          6
+                        ).toFixed(2)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border px-2 py-1">Trip Fuel</td>
+                      <td className="border px-2 py-1">
+                        {(
+                          Number(formData.flightDuration) * data[0].extraInfo.model.fuelRate
+                        ).toFixed(2)}
+                      </td>
+                      <td className="border px-2 py-1">
+                        {(
+                          Number(formData.flightDuration) *
+                          data[0].extraInfo.model.fuelRate *
+                          6
+                        ).toFixed(2)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border px-2 py-1">Fuel on Landing</td>
+                      <td className="border px-2 py-1">
+                        {(
+                          Number(formData.fuelLoaded) -
+                          Number(formData.startups) * data[0].extraInfo.model.groundFuelRate -
+                          Number(formData.flightDuration) * data[0].extraInfo.model.fuelRate
+                        ).toFixed(2)}
+                      </td>
+                      <td className="border px-2 py-1">
+                        {data[0].extraInfo.landingWeight -
+                          data[0].extraInfo.takeoffWeight +
+                          (
+                            Number(formData.flightDuration) *
+                            data[0].extraInfo.model.fuelRate *
+                            6
+                          ).toFixed(2)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border px-2 py-1 font-bold">Min Dep. Fuel</td>
+                      <td className="border px-2 py-1">
+                        {data[0].extraInfo.minDepFuel.toFixed(2)}
+                      </td>
+                      <td className="border px-2 py-1"></td>
+                    </tr>
+                    <tr>
+                      <td className="border px-2 py-1 font-bold">Max Dep. Fuel</td>
+                      <td className="border px-2 py-1">
+                        {data[0].extraInfo.maxDepFuel
+                          ? `${data[0].extraInfo.maxDepFuel.toFixed(2)}`
+                          : 'N/A'}
+                      </td>
+                      <td className="border px-2 py-1"></td>
+                    </tr>
+                    <tr>
+                      <td className="border px-2 py-1 font-bold">Endurance</td>
+                      <td className="border px-2 py-1">
+                        {data[0].extraInfo.endurance.toFixed(2)} hrs
+                      </td>
+                      <td className="border px-2 py-1"></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* Va / Vref */}
+                <table className="w-full border border-black text-left">
+                  <tbody>
+                    <tr>
+                      <td className="border px-2 py-1">Va</td>
+                      <td className="border px-2 py-1">{data[0].extraInfo.va.toFixed(2)} KIAS</td>
+                    </tr>
+                    <tr>
+                      <td className="border px-2 py-1">Vref</td>
+                      <td className="border px-2 py-1">{data[0].extraInfo.vref.toFixed(2)} KIAS</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* Utility Category */}
+                <table className="w-full border border-black text-left">
+                  <tbody>
+                    <tr>
+                      <td className="border px-2 py-1">Utility Max. Fuel</td>
+                      <td className="border px-2 py-1">
+                        {data[0].extraInfo.utilityMaxFuel
+                          ? `${data[0].extraInfo.utilityMaxFuel.toFixed(2)} Gal`
+                          : 'N/A'}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border px-2 py-1">Flt. Time to Utility</td>
+                      <td className="border px-2 py-1">
+                        {data[0].extraInfo.timeToUtility
+                          ? `${data[0].extraInfo.timeToUtility.toFixed(2)} hrs`
+                          : 'N/A'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* Category message */}
+                <div className="mt-2 text-sm">
+                  {data[0].extraInfo.utilityCat && (
+                    <span className="text-blue-600 font-bold">NORMAL CATEGORY</span>
+                  )}
+                  {data[0].extraInfo.noSpin && (
+                    <span className="text-red-600 font-bold block">SPINS PROHIBITED</span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           <Button onClick={handleDownloadGraph} className="mt-4">
             Download Graph
