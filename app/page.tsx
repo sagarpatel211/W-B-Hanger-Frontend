@@ -181,15 +181,15 @@ function updateModel(m: {
         { x: 100.4, y: 2535 },
       ];
       m.utilityCg = [
-        { x: 94.5, y: 2161 },
+        { x: 94.5, y: 2161 }, // same as utility for connecting lines
         { x: 100.4, y: 2161 },
       ];
       break;
     case 'P28A':
       m.normalCg = [
-        { x: 82, y: 2375 },
-        { x: 88.9, y: 2750 },
-        { x: 91.5, y: 2750 },
+        { x: 82, y: 2375 }, // these r the axes for the graph
+        { x: 88.9, y: 2750 }, // these r the points so we connect 2375 with 2750
+        { x: 91.5, y: 2750 }, // so min is 82, max is 91.5, same for y so bounds of graph
       ];
       m.utilityCg = [{ x: 0, y: 0 }];
       break;
@@ -200,7 +200,7 @@ function updateModel(m: {
         { x: 89, y: 3800 },
         { x: 93, y: 3800 },
       ];
-      m.utilityCg = [{ x: 0, y: 0 }];
+      m.utilityCg = [{ x: 0, y: 0 }]; // dont draw if its 0, 0
       break;
   }
 
@@ -362,6 +362,34 @@ function constrainedOptimization(
   return null; // No valid solution found
 }
 
+function AircraftRegDropdown({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+}) {
+  const selected = aircrafts.find((a) => a.registration === value) || null;
+  return (
+    <div className="flex items-center gap-2">
+      <span className="font-semibold">{selected ? selected.prefix : 'Prefix'}</span>
+      <select
+        className="border rounded p-2"
+        value={value}
+        onChange={(e) => onChange(e.target.value.toUpperCase())}
+      >
+        <option value="">Select Reg</option>
+        {aircrafts.map((a, idx) => (
+          <option key={idx} value={a.registration}>
+            {a.registration}
+          </option>
+        ))}
+      </select>
+      <span className="font-semibold">{selected ? selected.model : 'Model'}</span>
+    </div>
+  );
+}
+
 export default function Home() {
   const [formData, setFormData] = useState<FormData>({
     aircraftReg: '',
@@ -387,7 +415,7 @@ export default function Home() {
     const density = 6;
     const fuelWeight = fuelLoaded * density;
     const startTaxiFuel = Number(formData.startups) * model.groundFuelRate;
-    const tripFuel = Number(formData.flightDuration) * model.fuelRate;
+    const tripFuel = Number(formData.flightDuration) * model.fuelRate; // fuelRate = fuelConsumption
     const landingFuel = fuelLoaded - startTaxiFuel - tripFuel;
     const reserveTime = 1;
     const reserveFuel = reserveTime * model.fuelRate;
@@ -411,7 +439,7 @@ export default function Home() {
     ];
     let takeoffWeight = aircraft.weight;
     for (const w of weight) {
-      takeoffWeight += w;
+      takeoffWeight += w; // THIS IS y for POINT TOW, green for takeoff
     }
 
     let takeoffMoment = aircraft.moment;
@@ -420,7 +448,7 @@ export default function Home() {
     }
 
     const takeoffArm = takeoffMoment / takeoffWeight;
-    const landingWeight = takeoffWeight - tripFuel * density;
+    const landingWeight = takeoffWeight - tripFuel * density; // x for POINT TOW, this landing so red
     const landingMoment = takeoffMoment - tripFuel * density * aircraft.fuelArm;
     const landingArm = landingMoment / landingWeight;
 
@@ -526,377 +554,371 @@ export default function Home() {
   };
 
   const handleDownloadGraph = async () => {
-    const chart = document.getElementById('chart-container');
-    if (chart) {
-      toPng(chart, { backgroundColor: 'white' })
-        .then((dataUrl) => {
-          const link = document.createElement('a');
-          link.download = 'graph.png';
-          link.href = dataUrl;
-          link.click();
-        })
-        .catch((err) => {
-          console.error('oops, something went wrong!', err);
-        });
-    }
+    toPng(document.documentElement, { backgroundColor: 'white' })
+      .then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = 'full-screenshot.png';
+        link.href = dataUrl;
+        link.click();
+      })
+      .catch((err) => {
+        console.error('Error capturing screenshot:', err);
+      });
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-8 p-6 border rounded-2xl shadow-md"
-      >
-        {/* Step 1 */}
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-row items-center gap-2">
-            <h3 className="text-lg font-bold">Step 1</h3>
-            <span className="text-sm">3-letter aircraft reg</span>
+    <>
+      <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-8 p-6 border rounded-2xl shadow-md"
+        >
+          {/* Step 1: Aircraft Registration */}
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row items-center gap-2">
+              <h3 className="text-lg font-bold">Step 1</h3>
+              <span className="text-sm">3-letter aircraft reg</span>
+            </div>
+            <AircraftRegDropdown
+              value={formData.aircraftReg}
+              onChange={(val) => setFormData({ ...formData, aircraftReg: val })}
+            />
           </div>
-          <Input
-            id="aircraftReg"
-            placeholder="e.g. ABC"
-            maxLength={3}
-            className="w-full border border-gray-800 rounded p-2"
-            value={formData.aircraftReg}
-            onChange={(e) =>
-              setFormData({ ...formData, aircraftReg: e.target.value.toUpperCase() })
-            }
-          />
-        </div>
-        {/* Step 2 */}
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-row items-center gap-2">
-            <h3 className="text-lg font-bold">Step 2</h3>
-            <span className="text-sm">Enter loading parameters</span>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Front Left</label>
-              <Input
-                type="number"
-                placeholder="Front Left"
-                className="w-full border border-gray-800 rounded p-2"
-                value={formData.frontLeft}
-                onChange={(e) => setFormData({ ...formData, frontLeft: e.target.value })}
-              />
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-row items-center gap-2">
+              <h3 className="text-lg font-bold">Step 2</h3>
+              <span className="text-sm">Enter loading parameters</span>
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Front Right</label>
-              <Input
-                type="number"
-                placeholder="Front Right"
-                className="w-full border border-gray-800 rounded p-2"
-                value={formData.frontRight}
-                onChange={(e) => setFormData({ ...formData, frontRight: e.target.value })}
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Rear Left</label>
-              <Input
-                type="number"
-                placeholder="Rear Left"
-                className="w-full border border-gray-800 rounded p-2"
-                value={formData.rearLeft}
-                onChange={(e) => setFormData({ ...formData, rearLeft: e.target.value })}
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Rear Right</label>
-              <Input
-                type="number"
-                placeholder="Rear Right"
-                className="w-full border border-gray-800 rounded p-2"
-                value={formData.rearRight}
-                onChange={(e) => setFormData({ ...formData, rearRight: e.target.value })}
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Bag 1</label>
-              <Input
-                type="number"
-                placeholder="Bag 1"
-                className="w-full border border-gray-800 rounded p-2"
-                value={formData.bag1}
-                onChange={(e) => setFormData({ ...formData, bag1: e.target.value })}
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Bag 2</label>
-              <Input
-                type="number"
-                placeholder="Bag 2"
-                className="w-full border border-gray-800 rounded p-2"
-                value={formData.bag2}
-                onChange={(e) => setFormData({ ...formData, bag2: e.target.value })}
-              />
-            </div>
-          </div>
-        </div>
-        {/* Step 3 */}
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-row items-center gap-2">
-            <h3 className="text-lg font-bold">Step 3</h3>
-            <span className="text-sm">Flight parameters</span>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Flight duration (hrs)</label>
-              <Input
-                type="number"
-                placeholder="Flight duration (hrs)"
-                className="w-full border border-gray-800 rounded p-2"
-                value={formData.flightDuration}
-                onChange={(e) => setFormData({ ...formData, flightDuration: e.target.value })}
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Number of startups</label>
-              <Input
-                type="number"
-                placeholder="Number of startups"
-                className="w-full border border-gray-800 rounded p-2"
-                value={formData.startups}
-                onChange={(e) => setFormData({ ...formData, startups: e.target.value })}
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Fuel consumption (gph)</label>
-              <Input
-                type="number"
-                placeholder="Fuel consumption (gph)"
-                className="w-full border border-gray-800 rounded p-2"
-                value={formData.fuelConsumption}
-                onChange={(e) => setFormData({ ...formData, fuelConsumption: e.target.value })}
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Fuel loaded (optional)</label>
-              <Input
-                type="number"
-                placeholder="Fuel loaded (optional)"
-                className="w-full border border-gray-800 rounded p-2"
-                value={formData.fuelLoaded}
-                onChange={(e) => setFormData({ ...formData, fuelLoaded: e.target.value })}
-              />
-            </div>
-          </div>
-        </div>
-        <Button type="submit" className="mt-4">
-          Submit
-        </Button>
-      </form>
-      {showGraph && (
-        <div className="p-6 border rounded-2xl shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Line Graph</h2>
-          <div id="chart-container">
-            <ResponsiveContainer width="100%" height={300}>
-              <ComposedChart>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Front Left</label>
+                <Input
                   type="number"
-                  dataKey="x"
-                  label={{
-                    value: 'C.G. (inches aft of datum)',
-                    position: 'insideBottom',
-                    offset: -5,
-                  }}
-                  domain={['auto', 'auto']}
+                  placeholder="Front Left"
+                  className="w-full border border-gray-800 rounded p-2"
+                  value={formData.frontLeft}
+                  onChange={(e) => setFormData({ ...formData, frontLeft: e.target.value })}
                 />
-                <YAxis
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Front Right</label>
+                <Input
                   type="number"
-                  dataKey="y"
-                  label={{ value: 'Weight (lbs)', angle: -90, position: 'insideLeft' }}
-                  domain={['auto', 'auto']}
+                  placeholder="Front Right"
+                  className="w-full border border-gray-800 rounded p-2"
+                  value={formData.frontRight}
+                  onChange={(e) => setFormData({ ...formData, frontRight: e.target.value })}
                 />
-                <Tooltip />
-                <Legend />
-                <Area
-                  dataKey="y"
-                  data={data[0].normalEnvelope}
-                  type="linear"
-                  name="Normal Category"
-                  fill="lightblue"
-                  fillOpacity={0.4}
-                  stroke="blue"
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Rear Left</label>
+                <Input
+                  type="number"
+                  placeholder="Rear Left"
+                  className="w-full border border-gray-800 rounded p-2"
+                  value={formData.rearLeft}
+                  onChange={(e) => setFormData({ ...formData, rearLeft: e.target.value })}
                 />
-                <Area
-                  dataKey="y"
-                  data={data[0].utilityEnvelope}
-                  type="linear"
-                  name="Utility Category"
-                  fill="lightgreen"
-                  fillOpacity={0.4}
-                  stroke="green"
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Rear Right</label>
+                <Input
+                  type="number"
+                  placeholder="Rear Right"
+                  className="w-full border border-gray-800 rounded p-2"
+                  value={formData.rearRight}
+                  onChange={(e) => setFormData({ ...formData, rearRight: e.target.value })}
                 />
-                {data[0].points.map((pt) => (
-                  <Line
-                    key={pt.name}
-                    data={[pt]}
-                    dataKey="y"
-                    name={pt.name}
-                    type="linear"
-                    stroke={pt.name === 'TOW' ? '#FF0000' : '#FFA500'}
-                    strokeDasharray="5 5"
-                    dot={{ r: 6 }}
-                    isAnimationActive={false}
+              </div>
+            </div>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Bag 1</label>
+                <Input
+                  type="number"
+                  placeholder="Bag 1"
+                  className="w-full border border-gray-800 rounded p-2"
+                  value={formData.bag1}
+                  onChange={(e) => setFormData({ ...formData, bag1: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Bag 2</label>
+                <Input
+                  type="number"
+                  placeholder="Bag 2"
+                  className="w-full border border-gray-800 rounded p-2"
+                  value={formData.bag2}
+                  onChange={(e) => setFormData({ ...formData, bag2: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-row items-center gap-2">
+              <h3 className="text-lg font-bold">Step 3</h3>
+              <span className="text-sm">Flight parameters</span>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Flight duration (hrs)</label>
+                <Input
+                  type="number"
+                  placeholder="Flight duration (hrs)"
+                  className="w-full border border-gray-800 rounded p-2"
+                  value={formData.flightDuration}
+                  onChange={(e) => setFormData({ ...formData, flightDuration: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Number of startups</label>
+                <Input
+                  type="number"
+                  placeholder="Number of startups"
+                  className="w-full border border-gray-800 rounded p-2"
+                  value={formData.startups}
+                  onChange={(e) => setFormData({ ...formData, startups: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Fuel consumption (gph)</label>
+                <Input
+                  type="number"
+                  placeholder="Fuel consumption (gph)"
+                  className="w-full border border-gray-800 rounded p-2"
+                  value={formData.fuelConsumption}
+                  onChange={(e) => setFormData({ ...formData, fuelConsumption: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Fuel loaded (optional)</label>
+                <Input
+                  type="number"
+                  placeholder="Fuel loaded (optional)"
+                  className="w-full border border-gray-800 rounded p-2"
+                  value={formData.fuelLoaded}
+                  onChange={(e) => setFormData({ ...formData, fuelLoaded: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+          <Button type="submit" className="mt-4">
+            Submit
+          </Button>
+        </form>
+        {showGraph && (
+          <div className="p-6 border rounded-2xl shadow-md">
+            <h2 className="text-xl font-semibold mb-4">Line Graph</h2>
+            <div id="chart-container">
+              <ResponsiveContainer width="100%" height={300}>
+                <ComposedChart>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    type="number"
+                    dataKey="x"
+                    label={{
+                      value: 'C.G. (inches aft of datum)',
+                      position: 'insideBottom',
+                      offset: -5,
+                    }}
+                    domain={['auto', 'auto']}
                   />
-                ))}
-              </ComposedChart>
-            </ResponsiveContainer>
-            {data[0]?.extraInfo && (
-              <div className="mt-6 space-y-6 text-sm">
-                {/* Fuel Table */}
-                <table className="w-full border border-black text-left">
-                  <thead>
-                    <tr>
-                      <th className="border px-2 py-1">Fuel</th>
-                      <th className="border px-2 py-1">Gal</th>
-                      <th className="border px-2 py-1">Lbs</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="border px-2 py-1">Fuel Loaded</td>
-                      <td className="border px-2 py-1">{Number(formData.fuelLoaded).toFixed(2)}</td>
-                      <td className="border px-2 py-1">
-                        {(Number(formData.fuelLoaded) * 6).toFixed(2)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border px-2 py-1">Start/Taxi</td>
-                      <td className="border px-2 py-1">
-                        {(
-                          Number(formData.startups) * data[0].extraInfo.model.groundFuelRate
-                        ).toFixed(2)}
-                      </td>
-                      <td className="border px-2 py-1">
-                        {(
-                          Number(formData.startups) *
-                          data[0].extraInfo.model.groundFuelRate *
-                          6
-                        ).toFixed(2)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border px-2 py-1">Trip Fuel</td>
-                      <td className="border px-2 py-1">
-                        {(
-                          Number(formData.flightDuration) * data[0].extraInfo.model.fuelRate
-                        ).toFixed(2)}
-                      </td>
-                      <td className="border px-2 py-1">
-                        {(
-                          Number(formData.flightDuration) *
-                          data[0].extraInfo.model.fuelRate *
-                          6
-                        ).toFixed(2)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border px-2 py-1">Fuel on Landing</td>
-                      <td className="border px-2 py-1">
-                        {(
-                          Number(formData.fuelLoaded) -
-                          Number(formData.startups) * data[0].extraInfo.model.groundFuelRate -
-                          Number(formData.flightDuration) * data[0].extraInfo.model.fuelRate
-                        ).toFixed(2)}
-                      </td>
-                      <td className="border px-2 py-1">
-                        {data[0].extraInfo.landingWeight -
-                          data[0].extraInfo.takeoffWeight +
-                          (
+                  <YAxis
+                    type="number"
+                    dataKey="y"
+                    label={{ value: 'Weight (lbs)', angle: -90, position: 'insideLeft' }}
+                    domain={['auto', 'auto']}
+                  />
+                  <Tooltip />
+                  <Legend />
+                  <Area
+                    dataKey="y"
+                    data={data[0].normalEnvelope}
+                    type="linear"
+                    name="Normal Category"
+                    fill="lightblue"
+                    fillOpacity={0.4}
+                    stroke="blue"
+                  />
+                  <Area
+                    dataKey="y"
+                    data={data[0].utilityEnvelope}
+                    type="linear"
+                    name="Utility Category"
+                    fill="lightgreen"
+                    fillOpacity={0.4}
+                    stroke="green"
+                  />
+                  {data[0].points.map((pt) => (
+                    <Line
+                      key={pt.name}
+                      data={[pt]}
+                      dataKey="y"
+                      name={pt.name}
+                      type="linear"
+                      stroke={pt.name === 'TOW' ? '#FF0000' : '#FFA500'}
+                      strokeDasharray="5 5"
+                      dot={{ r: 6 }}
+                      isAnimationActive={false}
+                    />
+                  ))}
+                </ComposedChart>
+              </ResponsiveContainer>
+              {data[0]?.extraInfo && (
+                <div className="mt-6 space-y-6 text-sm">
+                  <table className="w-full border border-black text-left">
+                    <thead>
+                      <tr>
+                        <th className="border px-2 py-1">Fuel</th>
+                        <th className="border px-2 py-1">Gal</th>
+                        <th className="border px-2 py-1">Lbs</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border px-2 py-1">Fuel Loaded</td>
+                        <td className="border px-2 py-1">
+                          {Number(formData.fuelLoaded).toFixed(2)}
+                        </td>
+                        <td className="border px-2 py-1">
+                          {(Number(formData.fuelLoaded) * 6).toFixed(2)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border px-2 py-1">Start/Taxi</td>
+                        <td className="border px-2 py-1">
+                          {(
+                            Number(formData.startups) * data[0].extraInfo.model.groundFuelRate
+                          ).toFixed(2)}
+                        </td>
+                        <td className="border px-2 py-1">
+                          {(
+                            Number(formData.startups) *
+                            data[0].extraInfo.model.groundFuelRate *
+                            6
+                          ).toFixed(2)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border px-2 py-1">Trip Fuel</td>
+                        <td className="border px-2 py-1">
+                          {(
+                            Number(formData.flightDuration) * data[0].extraInfo.model.fuelRate
+                          ).toFixed(2)}
+                        </td>
+                        <td className="border px-2 py-1">
+                          {(
                             Number(formData.flightDuration) *
                             data[0].extraInfo.model.fuelRate *
                             6
                           ).toFixed(2)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border px-2 py-1 font-bold">Min Dep. Fuel</td>
-                      <td className="border px-2 py-1">
-                        {data[0].extraInfo.minDepFuel.toFixed(2)}
-                      </td>
-                      <td className="border px-2 py-1"></td>
-                    </tr>
-                    <tr>
-                      <td className="border px-2 py-1 font-bold">Max Dep. Fuel</td>
-                      <td className="border px-2 py-1">
-                        {data[0].extraInfo.maxDepFuel
-                          ? `${data[0].extraInfo.maxDepFuel.toFixed(2)}`
-                          : 'N/A'}
-                      </td>
-                      <td className="border px-2 py-1"></td>
-                    </tr>
-                    <tr>
-                      <td className="border px-2 py-1 font-bold">Endurance</td>
-                      <td className="border px-2 py-1">
-                        {data[0].extraInfo.endurance.toFixed(2)} hrs
-                      </td>
-                      <td className="border px-2 py-1"></td>
-                    </tr>
-                  </tbody>
-                </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border px-2 py-1">Fuel on Landing</td>
+                        <td className="border px-2 py-1">
+                          {(
+                            Number(formData.fuelLoaded) -
+                            Number(formData.startups) * data[0].extraInfo.model.groundFuelRate -
+                            Number(formData.flightDuration) * data[0].extraInfo.model.fuelRate
+                          ).toFixed(2)}
+                        </td>
+                        <td className="border px-2 py-1">
+                          {data[0].extraInfo.landingWeight -
+                            data[0].extraInfo.takeoffWeight +
+                            (
+                              Number(formData.flightDuration) *
+                              data[0].extraInfo.model.fuelRate *
+                              6
+                            ).toFixed(2)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border px-2 py-1 font-bold">Min Dep. Fuel</td>
+                        <td className="border px-2 py-1">
+                          {data[0].extraInfo.minDepFuel.toFixed(2)}
+                        </td>
+                        <td className="border px-2 py-1"></td>
+                      </tr>
+                      <tr>
+                        <td className="border px-2 py-1 font-bold">Max Dep. Fuel</td>
+                        <td className="border px-2 py-1">
+                          {data[0].extraInfo.maxDepFuel
+                            ? `${data[0].extraInfo.maxDepFuel.toFixed(2)}`
+                            : 'N/A'}
+                        </td>
+                        <td className="border px-2 py-1"></td>
+                      </tr>
+                      <tr>
+                        <td className="border px-2 py-1 font-bold">Endurance</td>
+                        <td className="border px-2 py-1">
+                          {data[0].extraInfo.endurance.toFixed(2)} hrs
+                        </td>
+                        <td className="border px-2 py-1"></td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                {/* Va / Vref */}
-                <table className="w-full border border-black text-left">
-                  <tbody>
-                    <tr>
-                      <td className="border px-2 py-1">Va</td>
-                      <td className="border px-2 py-1">{data[0].extraInfo.va.toFixed(2)} KIAS</td>
-                    </tr>
-                    <tr>
-                      <td className="border px-2 py-1">Vref</td>
-                      <td className="border px-2 py-1">{data[0].extraInfo.vref.toFixed(2)} KIAS</td>
-                    </tr>
-                  </tbody>
-                </table>
+                  {/* Va / Vref */}
+                  <table className="w-full border border-black text-left">
+                    <tbody>
+                      <tr>
+                        <td className="border px-2 py-1">Va</td>
+                        <td className="border px-2 py-1">{data[0].extraInfo.va.toFixed(2)} KIAS</td>
+                      </tr>
+                      <tr>
+                        <td className="border px-2 py-1">Vref</td>
+                        <td className="border px-2 py-1">
+                          {data[0].extraInfo.vref.toFixed(2)} KIAS
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                {/* Utility Category */}
-                <table className="w-full border border-black text-left">
-                  <tbody>
-                    <tr>
-                      <td className="border px-2 py-1">Utility Max. Fuel</td>
-                      <td className="border px-2 py-1">
-                        {data[0].extraInfo.utilityMaxFuel
-                          ? `${data[0].extraInfo.utilityMaxFuel.toFixed(2)} Gal`
-                          : 'N/A'}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border px-2 py-1">Flt. Time to Utility</td>
-                      <td className="border px-2 py-1">
-                        {data[0].extraInfo.timeToUtility
-                          ? `${data[0].extraInfo.timeToUtility.toFixed(2)} hrs`
-                          : 'N/A'}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                  {/* Utility Category */}
+                  <table className="w-full border border-black text-left">
+                    <tbody>
+                      <tr>
+                        <td className="border px-2 py-1">Utility Max. Fuel</td>
+                        <td className="border px-2 py-1">
+                          {data[0].extraInfo.utilityMaxFuel
+                            ? `${data[0].extraInfo.utilityMaxFuel.toFixed(2)} Gal`
+                            : 'N/A'}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border px-2 py-1">Flt. Time to Utility</td>
+                        <td className="border px-2 py-1">
+                          {data[0].extraInfo.timeToUtility
+                            ? `${data[0].extraInfo.timeToUtility.toFixed(2)} hrs`
+                            : 'N/A'}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                {/* Category message */}
-                <div className="mt-2 text-sm">
-                  {data[0].extraInfo.utilityCat && (
-                    <span className="text-blue-600 font-bold">NORMAL CATEGORY</span>
-                  )}
-                  {data[0].extraInfo.noSpin && (
-                    <span className="text-red-600 font-bold block">SPINS PROHIBITED</span>
-                  )}
+                  {/* Category message */}
+                  <div className="mt-2 text-sm">
+                    {data[0].extraInfo.utilityCat && (
+                      <span className="text-blue-600 font-bold">NORMAL CATEGORY</span>
+                    )}
+                    {data[0].extraInfo.noSpin && (
+                      <span className="text-red-600 font-bold block">SPINS PROHIBITED</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+            <Button onClick={handleDownloadGraph} className="mt-4">
+              Download Graph {/* WE NEED TO SCREEN SHOT THE WHOLE PAGE, TEST IF WORKS ON MOBILE */}
+            </Button>
           </div>
-          <Button onClick={handleDownloadGraph} className="mt-4">
-            Download Graph
-          </Button>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }
