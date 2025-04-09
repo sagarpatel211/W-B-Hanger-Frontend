@@ -1,6 +1,7 @@
 # W-B-Hanger-Frontend
 
 ## Preview
+
 ![Preview](./preview.png)
 
 ## Steps for Development

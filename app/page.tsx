@@ -108,7 +108,15 @@ for (const m of models) {
   updateModel(m);
 }
 
-function updateModel(m) {
+function updateModel(m: {
+  name: any;
+  normalCg: { x: number; y: number }[];
+  utilityCg: { x: number; y: number }[];
+  va: { (weight: number): number; (weight: number): number; (weight: number): number };
+  va1: number;
+  va2: number;
+  va3: number;
+}) {
   switch (m.name) {
     case 'C152':
     case 'A152':
@@ -154,7 +162,7 @@ function updateModel(m) {
         { x: 94.5, y: 2161 },
         { x: 102, y: 2161 },
       ];
-	  break;
+      break;
     case 'DA40':
       m.normalCg = [
         { x: 94.5, y: 2161 },
@@ -165,7 +173,7 @@ function updateModel(m) {
         { x: 94.5, y: 2161 },
         { x: 100.4, y: 2161 },
       ];
-	  break;
+      break;
     case 'DA40AP':
       m.normalCg = [
         { x: 94.5, y: 2161 },
@@ -176,7 +184,7 @@ function updateModel(m) {
         { x: 94.5, y: 2161 },
         { x: 100.4, y: 2161 },
       ];
-	  break;
+      break;
     case 'P28A':
       m.normalCg = [
         { x: 82, y: 2375 },
@@ -184,7 +192,7 @@ function updateModel(m) {
         { x: 91.5, y: 2750 },
       ];
       m.utilityCg = [{ x: 0, y: 0 }];
-	  break;
+      break;
     case 'PA44':
       m.normalCg = [
         { x: 84, y: 2800 },
@@ -193,7 +201,7 @@ function updateModel(m) {
         { x: 93, y: 3800 },
       ];
       m.utilityCg = [{ x: 0, y: 0 }];
-	  break;
+      break;
   }
 
   switch (m.name) {
@@ -260,13 +268,9 @@ type FormData = {
 };
 
 type GraphData = {
-  cg: number;
-  landingWt: number;
-  currentAc: number;
-  normalMin: number;
-  normalMax: number;
-  utilityMin: number;
-  utilityMax: number;
+  points: { name: string; x: number; y: number }[];
+  normalEnvelope: { x: number; y: number }[];
+  utilityEnvelope: { x: number; y: number }[];
 };
 
 function lookupAircraft(reg: string) {
@@ -301,8 +305,8 @@ function lookupModel(aircraft: any) {
   return null;
 }
 
-function linearConstraints(points, x: number, y: number): boolean {
-  if (x < points[0].x || x > points[points.lenght - 1]) {
+function linearConstraints(points: { x: number; y: number }[], x: number, y: number): boolean {
+  if (x < points[0].x || x > points[points.length - 1].x) {
     return false;
   }
 
@@ -350,7 +354,7 @@ function constrainedOptimization(
     }
   }
 
-  if (bestX !== null && bestY0 !== null) {
+  if (bestX !== null && bestY0 !== null && bestY1 !== null) {
     return { x: bestX, y0: bestY0, y1: bestY1 };
   }
 
@@ -405,7 +409,7 @@ export default function Home() {
       aircraft.fuelArm,
     ];
     let takeoffWeight = aircraft.weight;
-    for (var w of weight) {
+    for (const w of weight) {
       takeoffWeight += w;
     }
 
@@ -422,7 +426,7 @@ export default function Home() {
     const va = model.va(takeoffWeight);
     const vref = 1.3 * model.vso * Math.sqrt(landingWeight / model.mtow);
 
-    var opt = constrainedOptimization(
+    let opt = constrainedOptimization(
       (fuel: number) => {
         const weight = fuel * density + takeoffWeight - fuelWeight;
         const moment = takeoffMoment + (fuel * density - fuelWeight) * aircraft.fuelArm;
@@ -454,7 +458,9 @@ export default function Home() {
     const utilityMaxArm = opt == null ? null : opt.y0;
     const utilityMaxWeight = opt == null ? null : opt.y1;
     const timeToUtility =
-      opt == null ? null : Math.max((fuelLoaded - utilityMaxFuel) / model.fuelRate, 0);
+      opt == null || utilityMaxFuel == null
+        ? null
+        : Math.max((fuelLoaded - utilityMaxFuel) / model.fuelRate, 0);
 
     // flags
     const belowMinDepFuel = fuelLoaded < minDepFuel;
@@ -474,17 +480,12 @@ export default function Home() {
       utilityMaxFuel == null ? true : model.noSpin || utilityMaxFuel < reserveFuel || hasPassenger;
 
     return {
-      cg: Number(formData.frontLeft) || 15,
-      landingWt: Number(formData.flightDuration)
-        ? 1000 + Number(formData.flightDuration) * 10
-        : 1000,
-      currentAc: Number(formData.flightDuration)
-        ? 1100 - Number(formData.flightDuration) * 5
-        : 1100,
-      normalMin: 1050,
-      normalMax: 1150,
-      utilityMin: 950,
-      utilityMax: 1000,
+      points: [
+        { name: 'TOW', x: takeoffArm, y: takeoffWeight },
+        { name: 'ELW', x: landingArm, y: landingWeight },
+      ],
+      normalEnvelope: model.normalCg,
+      utilityEnvelope: model.utilityCg,
     };
   };
   // ================================================
@@ -667,69 +668,57 @@ export default function Home() {
           <h2 className="text-xl font-semibold mb-4">Line Graph</h2>
           <div id="chart-container">
             <ResponsiveContainer width="100%" height={300}>
-              <ComposedChart data={data}>
+              <ComposedChart>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
-                  dataKey="cg"
+                  type="number"
+                  dataKey="x"
                   label={{
                     value: 'C.G. (inches aft of datum)',
                     position: 'insideBottom',
                     offset: -5,
                   }}
+                  domain={['auto', 'auto']}
                 />
-                <YAxis label={{ value: 'Weight (lbs)', angle: -90, position: 'insideLeft' }} />
+                <YAxis
+                  type="number"
+                  dataKey="y"
+                  label={{ value: 'Weight (lbs)', angle: -90, position: 'insideLeft' }}
+                  domain={['auto', 'auto']}
+                />
                 <Tooltip />
                 <Legend />
                 <Area
-                  type="monotone"
-                  dataKey="normalMax"
-                  stroke="none"
+                  dataKey="y"
+                  data={data[0].normalEnvelope}
+                  type="linear"
+                  name="Normal Category"
                   fill="lightblue"
-                  fillOpacity={0.3}
-                  stackId="normal"
+                  fillOpacity={0.4}
+                  stroke="blue"
                 />
                 <Area
-                  type="monotone"
-                  dataKey="normalMin"
-                  stroke="none"
-                  fill="white"
-                  fillOpacity={1}
-                  stackId="normal"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="utilityMax"
-                  stroke="none"
+                  dataKey="y"
+                  data={data[0].utilityEnvelope}
+                  type="linear"
+                  name="Utility Category"
                   fill="lightgreen"
-                  fillOpacity={0.3}
-                  stackId="utility"
+                  fillOpacity={0.4}
+                  stroke="green"
                 />
-                <Area
-                  type="monotone"
-                  dataKey="utilityMin"
-                  stroke="none"
-                  fill="white"
-                  fillOpacity={1}
-                  stackId="utility"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="landingWt"
-                  stroke="#FFA500"
-                  strokeDasharray="5 5"
-                  strokeLinecap="square"
-                  dot={<SquareDot />}
-                  name="Landing Wt"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="currentAc"
-                  stroke="#FF0000"
-                  strokeDasharray="5 5"
-                  strokeLinecap="square"
-                  dot={<SquareDot />}
-                  name="Current a/c"
-                />
+                {data[0].points.map((pt) => (
+                  <Line
+                    key={pt.name}
+                    data={[pt]}
+                    dataKey="y"
+                    name={pt.name}
+                    type="linear"
+                    stroke={pt.name === 'TOW' ? '#FF0000' : '#FFA500'}
+                    strokeDasharray="5 5"
+                    dot={{ r: 6 }}
+                    isAnimationActive={false}
+                  />
+                ))}
               </ComposedChart>
             </ResponsiveContainer>
           </div>
