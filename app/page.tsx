@@ -15,7 +15,7 @@ import {
   Legend,
   DotProps,
 } from 'recharts';
-import { toPng } from 'html-to-image';
+import html2canvas from 'html2canvas-pro';
 
 // Move these to separate file
 function csvJSON(csv: string) {
@@ -554,16 +554,23 @@ export default function Home() {
   };
 
   const handleDownloadGraph = async () => {
-    toPng(document.documentElement, { backgroundColor: 'white' })
-      .then((dataUrl) => {
-        const link = document.createElement('a');
-        link.download = 'full-screenshot.png';
-        link.href = dataUrl;
-        link.click();
-      })
-      .catch((err) => {
-        console.error('Error capturing screenshot:', err);
+    try {
+      const canvas = await html2canvas(document.body, {
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight,
+        backgroundColor: '#ffffff',
       });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = 'full-page-screenshot.png';
+      link.click();
+    } catch (error) {
+      console.error('Error capturing full page screenshot:', error);
+    }
   };
 
   return (
