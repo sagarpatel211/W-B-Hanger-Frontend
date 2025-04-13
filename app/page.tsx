@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { FormData, GraphData, calculateGraphData } from '@/lib/math';
 import { Graph } from '@/components/graph';
 import { OutputTables } from '@/components/outputtables';
-import { downloadGraph } from '@/components/graph';
 import { InputFields } from '@/components/inputfields';
 
 export default function Home() {
@@ -22,42 +21,26 @@ export default function Home() {
     fuelLoaded: '',
   });
 
-  const [data, setData] = useState<GraphData[]>([]);
-  const [showGraph, setShowGraph] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [data, setData] = useState<GraphData>(calculateGraphData(formData));
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setData([calculateGraphData(formData)]);
-      setShowGraph(true);
-      setLoading(false);
-    }, 500);
-  };
-
-  const handleDownloadGraph = () => {
-    downloadGraph();
-  };
+  const setAndUpdate = (data: FormData) => {
+    setFormData(data)
+    let graphData = calculateGraphData(formData)
+    console.log(data)
+    console.log(graphData)
+    setData(calculateGraphData(formData))
+  }
 
   return (
-    <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-      <div>
-        <InputFields formData={formData} setFormData={setFormData} handleSubmit={handleSubmit} />
+    <div className="min-h-screen flex flex-wrap gap-4 p-4">
+      <div className="flex-1 grow-3 min-w-md h-min p-6 border rounded-2xl shadow-md">
+        <InputFields formData={formData} setFormData={setAndUpdate} />
       </div>
-      <div className="flex flex-col gap-8">
-        {loading && (
-          <div className="flex justify-center items-center h-full">
-            <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
-          </div>
-        )}
-
-        {showGraph && !loading && (
-          <>
-            <Graph data={data} handleDownloadGraph={handleDownloadGraph} />
-            <OutputTables graphData={data[0]} formData={formData} />
-          </>
-        )}
+      <div className="flex-1 grow-7 h-min min-w-md p-6 border rounded-2xl shadow-md">
+        <Graph data={data} />
+      </div>
+      <div className="flex-1 grow-7 min-w-xl h-min p-6 border rounded-2xl shadow-md">
+        <OutputTables graphData={data} formData={formData} />
       </div>
     </div>
   );
