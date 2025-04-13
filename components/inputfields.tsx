@@ -49,13 +49,13 @@ export type FormData = {
 type InputFieldsProps = {
   formData: FormData;
   setFormData: (data: FormData) => void;
-  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 };
 
-export function InputFields({ formData, setFormData, handleSubmit }: InputFieldsProps) {
+
+export function InputFields({ formData, setFormData }: InputFieldsProps) {
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-8 p-6 border rounded-2xl shadow-md">
-      <div className="flex flex-col gap-2">
+    <form className="flex flex-col gap-2 p-6">
+      <div className="flex flex-col gap-1">
         <div className="flex flex-row items-center gap-2">
           <h3 className="text-lg font-bold">Step 1</h3>
           <span className="text-sm">3-letter aircraft reg</span>
@@ -65,7 +65,7 @@ export function InputFields({ formData, setFormData, handleSubmit }: InputFields
           onChange={(val) => setFormData({ ...formData, aircraftReg: val })}
         />
       </div>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
         <div className="flex flex-row items-center gap-2">
           <h3 className="text-lg font-bold">Step 2</h3>
           <span className="text-sm">Enter loading parameters</span>
@@ -137,7 +137,7 @@ export function InputFields({ formData, setFormData, handleSubmit }: InputFields
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
         <div className="flex flex-row items-center gap-2">
           <h3 className="text-lg font-bold">Step 3</h3>
           <span className="text-sm">Flight parameters</span>
@@ -187,9 +187,6 @@ export function InputFields({ formData, setFormData, handleSubmit }: InputFields
           </div>
         </div>
       </div>
-      <Button type="submit" className="mt-4">
-        Submit
-      </Button>
     </form>
   );
 }
