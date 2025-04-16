@@ -161,7 +161,7 @@ export function OutputTables({ graphData, formData }: OutputTablesProps) {
                 {formatNum(-graphData.extraInfo.tripWeight * graphData.extraInfo.fuelArm)}
               </td>
             </tr>
-            <tr className="font-bold bg-red-700 text-white">
+            <tr className="font-bold text-black">
               <td className={cellStyle}>Landing Totals</td>
               <td className={cellStyle}>{formatNum(graphData.extraInfo.landingWeight)}</td>
               <td className={cellStyle}>{formatNum(graphData.extraInfo.landingArm)}</td>

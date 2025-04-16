@@ -63,20 +63,21 @@ export function InputFields({ formData, setFormData }: InputFieldsProps) {
   const fuelRate = model?.fuelRate?.toString() ?? '0';
 
   const units: { [key in keyof FormData]?: string } = {
-    frontLeft: 'kg',
-    frontRight: 'kg',
-    rearLeft: 'kg',
-    rearRight: 'kg',
-    bag1: 'kg',
-    bag2: 'kg',
+    frontLeft: 'lbs',
+    frontRight: 'lbs',
+    rearLeft: 'lbs',
+    rearRight: 'lbs',
+    bag1: 'lbs',
+    bag2: 'lbs',
     flightDuration: 'hrs',
-    startups: '',
+    startups: '#',
     fuelConsumption: 'gph',
-    fuelLoaded: 'kg',
+    fuelLoaded: 'gal',
   };
 
   return (
     <form className="flex flex-col gap-2 p-6">
+      {/* Step 1 */}
       <div className="flex flex-col gap-1">
         <div className="flex flex-row items-center gap-2">
           <h3 className="text-lg font-bold">Step 1</h3>
@@ -86,8 +87,8 @@ export function InputFields({ formData, setFormData }: InputFieldsProps) {
           value={formData.aircraftReg}
           onChange={(val) => {
             const aircraft = lookupAircraft(val);
-            const model = lookupModel(aircraft);
-            const updatedFuelRate = model?.fuelRate?.toString() ?? '0';
+            const m = lookupModel(aircraft);
+            const updatedFuelRate = m?.fuelRate?.toString() ?? '0';
             setFormData({ ...formData, aircraftReg: val, fuelConsumption: updatedFuelRate });
           }}
         />
@@ -102,6 +103,29 @@ export function InputFields({ formData, setFormData }: InputFieldsProps) {
             ['Front Right', 'frontRight'],
             ['Rear Left', 'rearLeft'],
             ['Rear Right', 'rearRight'],
+          ].map(([label, key]) => (
+            <div className="flex flex-col gap-1" key={key}>
+              <label className="text-sm font-medium">{label}</label>
+              <div className="flex items-center">
+                <Input
+                  type="number"
+                  min="0"
+                  step="any"
+                  placeholder={label}
+                  className="w-full border border-gray-800 rounded-l p-2"
+                  value={formData[key as keyof FormData]}
+                  onChange={handleChange(key as keyof FormData)}
+                />
+                <div className="bg-gray-100 border border-l-0 border-gray-800 rounded-r px-3 py-2 text-sm text-gray-700">
+                  {units[key as keyof FormData]}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 mt-2">
+          {[
             ['Bag 1', 'bag1'],
             ['Bag 2', 'bag2'],
           ].map(([label, key]) => (
@@ -117,7 +141,7 @@ export function InputFields({ formData, setFormData }: InputFieldsProps) {
                   value={formData[key as keyof FormData]}
                   onChange={handleChange(key as keyof FormData)}
                 />
-                <div className="bg-gray-100 border border-l-0 border-gray-600 rounded-r px-3 py-2 text-sm text-gray-700">
+                <div className="bg-gray-100 border border-l-0 border-gray-800 rounded-r px-3 py-2 text-sm text-gray-700">
                   {units[key as keyof FormData]}
                 </div>
               </div>

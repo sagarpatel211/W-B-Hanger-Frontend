@@ -12,6 +12,7 @@ import {
   Legend,
   Scatter,
   TooltipProps,
+  ReferenceLine,
 } from 'recharts';
 import { GraphData } from '@/lib/math';
 import { useMemo } from 'react';
@@ -20,8 +21,8 @@ const NORMAL_COLOUR = 'blue';
 const NORMAL_FILL_COLOUR = 'lightblue';
 const UTILITY_COLOUR = 'green';
 const UTILITY_FILL_COLOUR = 'lightgreen';
-const TOW_COLOUR = '#FF0000';
-const ELW_COLOUR = '#FFA500';
+const TOW_COLOUR = '#00BB00';
+const ELW_COLOUR = '#CC0000';
 
 function roundTwoDecimals(num: number) {
   return Math.round(num * 100) / 100;
@@ -32,18 +33,29 @@ type GraphProps = {
 };
 
 export function Graph({ data }: GraphProps) {
-  const tow = useMemo(() => data.points?.find((point) => point.name === 'TOW'), [data.points]);
-  const elw = useMemo(() => data.points?.find((point) => point.name === 'ELW'), [data.points]);
+  const tow = useMemo(() => data.points?.find((p) => p.name === 'TOW'), [data.points]);
+  const elw = useMemo(() => data.points?.find((p) => p.name === 'ELW'), [data.points]);
+
+  const normalStartX = useMemo(() => data.normalEnvelope[0]?.x, [data.normalEnvelope]);
+  const normalEndX = useMemo(
+    () => data.normalEnvelope[data.normalEnvelope.length - 1]?.x,
+    [data.normalEnvelope]
+  );
+  const utilStartX = useMemo(() => data.utilityEnvelope[0]?.x, [data.utilityEnvelope]);
+  const utilEndX = useMemo(
+    () => data.utilityEnvelope[data.utilityEnvelope.length - 1]?.x,
+    [data.utilityEnvelope]
+  );
 
   const CustomTooltip = ({ active, payload, label }: TooltipProps<number, number>) => {
-    if (active && payload && label) {
+    if (active && payload && label != null) {
       return (
-        <div className="border shadow-md bg-white margin-5 padding-10">
+        <div className="border shadow-md bg-white p-4">
           <p>C.G: {roundTwoDecimals(label)}</p>
-          <p style={{ color: NORMAL_COLOUR }}>Normal: {payload[0].value}</p>
-          <p style={{ color: UTILITY_COLOUR }}>Utility: {payload[1].value}</p>
-          {label === tow?.x && <p style={{ color: TOW_COLOUR }}>TOW: {tow?.y}</p>}
-          {label === elw?.x && <p style={{ color: ELW_COLOUR }}>ELW: {elw?.y}</p>}
+          <p style={{ color: NORMAL_COLOUR }}>Normal: {payload[0]?.value}</p>
+          <p style={{ color: UTILITY_COLOUR }}>Utility: {payload[1]?.value}</p>
+          {label === tow?.x && tow && <p style={{ color: TOW_COLOUR }}>TOW: {tow.y}</p>}
+          {label === elw?.x && elw && <p style={{ color: ELW_COLOUR }}>ELW: {elw.y}</p>}
         </div>
       );
     }
@@ -51,61 +63,98 @@ export function Graph({ data }: GraphProps) {
   };
 
   return (
-    <div>
+    <div className="overflow-x-auto">
       <h2 className="text-xl font-semibold mb-4">Line Graph</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <ComposedChart data={data.points}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            name="GC"
-            type="number"
-            dataKey="x"
-            label={{
-              value: 'C.G. (inches aft of datum)',
-              position: 'insideBottom',
-              offset: -5,
-            }}
-            domain={['auto', 'auto']}
-          />
-          <YAxis
-            name="GC"
-            type="number"
-            dataKey="y"
-            label={{ value: 'Weight (lbs)', angle: -90, position: 'insideLeft' }}
-            domain={['auto', 'auto']}
-          />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend wrapperStyle={{ paddingTop: '20px' }} />
-          <Area
-            dataKey="y"
-            data={data.normalEnvelope}
-            type="linear"
-            name="Normal Category"
-            fill={NORMAL_FILL_COLOUR}
-            fillOpacity={0.4}
-            stroke={NORMAL_COLOUR}
-          />
-          <Area
-            dataKey="y"
-            data={data.utilityEnvelope}
-            type="linear"
-            name="Utility Category"
-            fill={UTILITY_FILL_COLOUR}
-            fillOpacity={0.4}
-            stroke={UTILITY_COLOUR}
-          />
-          <Line
-            dataKey="y"
-            type="monotone"
-            legendType="none"
-            tooltipType="none"
-            stroke="#000000"
-            data={data.points}
-          />
-          {tow && <Scatter name="TOW" dataKey="y" data={[tow]} fill={TOW_COLOUR} />}
-          {elw && <Scatter name="ELW" dataKey="y" data={[elw]} fill={ELW_COLOUR} />}
-        </ComposedChart>
-      </ResponsiveContainer>
+      <div className="w-full max-w-full">
+        <div id="graph-container" className="overflow-x-auto lg:overflow-visible">
+          <ResponsiveContainer width="100%" height={300}>
+            <ComposedChart data={data.points} margin={{ top: 10, right: 20, bottom: 30, left: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="x"
+                type="number"
+                name="C.G."
+                domain={[(dataMin: number) => dataMin, (dataMax: number) => dataMax]}
+                label={{
+                  value: 'C.G. (inches aft of datum)',
+                  position: 'insideBottom',
+                  offset: -5,
+                }}
+              />
+              <YAxis
+                dataKey="y"
+                type="number"
+                name="Weight"
+                label={{ value: 'Weight (lbs)', angle: -90, position: 'insideLeft' }}
+                domain={['auto', 'auto']}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '12px' }} />
+
+              {normalStartX != null && (
+                <ReferenceLine x={normalStartX} stroke={NORMAL_COLOUR} strokeDasharray="3 3" />
+              )}
+              {normalEndX != null && (
+                <ReferenceLine x={normalEndX} stroke={NORMAL_COLOUR} strokeDasharray="3 3" />
+              )}
+              {utilStartX != null && (
+                <ReferenceLine x={utilStartX} stroke={UTILITY_COLOUR} strokeDasharray="3 3" />
+              )}
+              {utilEndX != null && (
+                <ReferenceLine x={utilEndX} stroke={UTILITY_COLOUR} strokeDasharray="3 3" />
+              )}
+
+              <Area
+                dataKey="y"
+                data={data.normalEnvelope}
+                type="linear"
+                name="Normal Category"
+                stroke={NORMAL_COLOUR}
+                fill={NORMAL_FILL_COLOUR}
+                fillOpacity={0.4}
+                isAnimationActive={false}
+              />
+              <Area
+                dataKey="y"
+                data={data.utilityEnvelope}
+                type="linear"
+                name="Utility Category"
+                stroke={UTILITY_COLOUR}
+                fill={UTILITY_FILL_COLOUR}
+                fillOpacity={0.4}
+                isAnimationActive={false}
+              />
+              <Line
+                dataKey="y"
+                data={data.points}
+                type="monotone"
+                stroke="#000"
+                legendType="none"
+                tooltipType="none"
+                isAnimationActive={false}
+              />
+              {tow && (
+                <Scatter
+                  name="TOW"
+                  data={[tow]}
+                  dataKey="y"
+                  fill={TOW_COLOUR}
+                  isAnimationActive={false}
+                />
+              )}
+              {elw && (
+                <Scatter
+                  name="ELW"
+                  data={[elw]}
+                  dataKey="y"
+                  fill={ELW_COLOUR}
+                  isAnimationActive={false}
+                />
+              )}
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   );
 }
