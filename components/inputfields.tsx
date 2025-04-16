@@ -1,7 +1,6 @@
 'use client';
 
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { aircrafts } from '@/lib/constants';
 
 export function AircraftRegDropdown({
@@ -51,8 +50,14 @@ type InputFieldsProps = {
   setFormData: (data: FormData) => void;
 };
 
-
 export function InputFields({ formData, setFormData }: InputFieldsProps) {
+  const handleChange = (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
+      setFormData({ ...formData, [field]: value });
+    }
+  };
+
   return (
     <form className="flex flex-col gap-2 p-6">
       <div className="flex flex-col gap-1">
@@ -66,125 +71,56 @@ export function InputFields({ formData, setFormData }: InputFieldsProps) {
         />
       </div>
       <div className="flex flex-col gap-1">
-        <div className="flex flex-row items-center gap-2">
-          <h3 className="text-lg font-bold">Step 2</h3>
-          <span className="text-sm">Enter loading parameters</span>
-        </div>
+        <h3 className="text-lg font-bold">Step 2</h3>
+        <span className="text-sm">Enter loading parameters</span>
         <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Front Left</label>
-            <Input
-              type="number"
-              placeholder="Front Left"
-              className="w-full border border-gray-800 rounded p-2"
-              value={formData.frontLeft}
-              onChange={(e) => setFormData({ ...formData, frontLeft: e.target.value })}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Front Right</label>
-            <Input
-              type="number"
-              placeholder="Front Right"
-              className="w-full border border-gray-800 rounded p-2"
-              value={formData.frontRight}
-              onChange={(e) => setFormData({ ...formData, frontRight: e.target.value })}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Rear Left</label>
-            <Input
-              type="number"
-              placeholder="Rear Left"
-              className="w-full border border-gray-800 rounded p-2"
-              value={formData.rearLeft}
-              onChange={(e) => setFormData({ ...formData, rearLeft: e.target.value })}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Rear Right</label>
-            <Input
-              type="number"
-              placeholder="Rear Right"
-              className="w-full border border-gray-800 rounded p-2"
-              value={formData.rearRight}
-              onChange={(e) => setFormData({ ...formData, rearRight: e.target.value })}
-            />
-          </div>
-        </div>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Bag 1</label>
-            <Input
-              type="number"
-              placeholder="Bag 1"
-              className="w-full border border-gray-800 rounded p-2"
-              value={formData.bag1}
-              onChange={(e) => setFormData({ ...formData, bag1: e.target.value })}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Bag 2</label>
-            <Input
-              type="number"
-              placeholder="Bag 2"
-              className="w-full border border-gray-800 rounded p-2"
-              value={formData.bag2}
-              onChange={(e) => setFormData({ ...formData, bag2: e.target.value })}
-            />
-          </div>
+          {[
+            ['Front Left', 'frontLeft'],
+            ['Front Right', 'frontRight'],
+            ['Rear Left', 'rearLeft'],
+            ['Rear Right', 'rearRight'],
+            ['Bag 1', 'bag1'],
+            ['Bag 2', 'bag2'],
+          ].map(([label, key]) => (
+            <div className="flex flex-col gap-1" key={key}>
+              <label className="text-sm font-medium">{label}</label>
+              <Input
+                type="number"
+                min="0"
+                step="any"
+                placeholder={label}
+                className="w-full border border-gray-800 rounded p-2"
+                value={formData[key as keyof FormData]}
+                onChange={handleChange(key as keyof FormData)}
+              />
+            </div>
+          ))}
         </div>
       </div>
+
       <div className="flex flex-col gap-1">
-        <div className="flex flex-row items-center gap-2">
-          <h3 className="text-lg font-bold">Step 3</h3>
-          <span className="text-sm">Flight parameters</span>
-        </div>
+        <h3 className="text-lg font-bold">Step 3</h3>
+        <span className="text-sm">Flight parameters</span>
         <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Flight duration (hrs)</label>
-            <Input
-              type="number"
-              placeholder="Flight duration (hrs)"
-              className="w-full border border-gray-800 rounded p-2"
-              value={formData.flightDuration}
-              onChange={(e) => setFormData({ ...formData, flightDuration: e.target.value })}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Number of startups</label>
-            <Input
-              type="number"
-              placeholder="Number of startups"
-              className="w-full border border-gray-800 rounded p-2"
-              value={formData.startups}
-              onChange={(e) => setFormData({ ...formData, startups: e.target.value })}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Fuel consumption (gph)</label>
-            <Input
-              type="number"
-              placeholder="Fuel consumption (gph)"
-              className="w-full border border-gray-800 rounded p-2"
-              value={formData.fuelConsumption}
-              onChange={(e) => setFormData({ ...formData, fuelConsumption: e.target.value })}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium">Fuel loaded (optional)</label>
-            <Input
-              type="number"
-              placeholder="Fuel loaded (optional)"
-              className="w-full border border-gray-800 rounded p-2"
-              value={formData.fuelLoaded}
-              onChange={(e) => setFormData({ ...formData, fuelLoaded: e.target.value })}
-            />
-          </div>
+          {[
+            ['Flight duration (hrs)', 'flightDuration'],
+            ['Number of startups', 'startups'],
+            ['Fuel consumption (gph)', 'fuelConsumption'],
+            ['Fuel loaded (optional)', 'fuelLoaded'],
+          ].map(([label, key]) => (
+            <div className="flex flex-col gap-1" key={key}>
+              <label className="text-sm font-medium">{label}</label>
+              <Input
+                type="number"
+                min="0"
+                step="any"
+                placeholder={label}
+                className="w-full border border-gray-800 rounded p-2"
+                value={formData[key as keyof FormData]}
+                onChange={handleChange(key as keyof FormData)}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </form>

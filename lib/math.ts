@@ -358,27 +358,27 @@ export function calculateGraphData(formData: FormData): GraphData {
     utilityEnvelope: model.utilityCg,
     extraInfo: {
       model,
-	  fuelLoaded,
-	  fuelWeight,
-	  startTaxiFuel,
-	  startTaxiWeight,
-	  takeoffFuel,
-	  takeoffFuelWeight,
-	  tripFuel,
-	  tripWeight,
-	  landingFuel,
-	  landingFuelWeight,
+      fuelLoaded,
+      fuelWeight,
+      startTaxiFuel,
+      startTaxiWeight,
+      takeoffFuel,
+      takeoffFuelWeight,
+      tripFuel,
+      tripWeight,
+      landingFuel,
+      landingFuelWeight,
       takeoffWeight,
       landingWeight,
       takeoffArm,
       landingArm,
-	  takeoffMoment,
-	  landingMoment,
+      takeoffMoment,
+      landingMoment,
       endurance,
-	  
+
       va,
       vref,
-	  
+
       minDepFuel,
       maxDepFuel,
       maxArm,
@@ -391,17 +391,17 @@ export function calculateGraphData(formData: FormData): GraphData {
       aircraftWeight: aircraft.weight,
       aircraftMoment: aircraft.moment,
       aircraftArm: aircraft.moment / aircraft.weight,
-	  
+
       frontSeatWeight: weight[FRONT],
       rearSeatWeight: weight[REAR],
       bag1Weight: weight[BAG_1],
       bag2Weight: weight[BAG_2],
-	  
+
       frontSeatMoment: weight[FRONT] * arm[FRONT],
       rearSeatMoment: weight[REAR] * arm[REAR],
       bag1Moment: weight[BAG_1] * arm[BAG_1],
       bag2Moment: weight[BAG_2] * arm[BAG_2],
-	  
+
       frontSeatArm: aircraft.frontSeatArm,
       rearSeatArm: aircraft.rearSeatArm,
       bag1Arm: aircraft.bag1Arm,

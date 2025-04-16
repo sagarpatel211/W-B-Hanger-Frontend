@@ -64,7 +64,9 @@ export function OutputTables({ graphData, formData }: OutputTablesProps) {
             <tr>
               <td className="border px-2 py-1">Fuel on Landing</td>
               <td className="border px-2 py-1">{formatNum(graphData.extraInfo.landingFuel)}</td>
-              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.landingFuelWeight)}</td>
+              <td className="border px-2 py-1">
+                {formatNum(graphData.extraInfo.landingFuelWeight)}
+              </td>
             </tr>
             <tr className="font-bold">
               <td className="border px-2 py-1">Min Dep. Fuel</td>
@@ -130,7 +132,9 @@ export function OutputTables({ graphData, formData }: OutputTablesProps) {
             </tr>
             <tr>
               <td className="border px-2 py-1">Fuel</td>
-              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.takeoffFuelWeight)}</td>
+              <td className="border px-2 py-1">
+                {formatNum(graphData.extraInfo.takeoffFuelWeight)}
+              </td>
               <td className="border px-2 py-1">{formatNum(graphData.extraInfo.fuelArm)}</td>
               <td className="border px-2 py-1">
                 {formatNum(graphData.extraInfo.takeoffFuelWeight * graphData.extraInfo.fuelArm)}
@@ -145,9 +149,7 @@ export function OutputTables({ graphData, formData }: OutputTablesProps) {
             <tr>
               <td className="border px-2 py-1">Fuel for Flight</td>
               <td className="border px-2 py-1">{formatNum(-graphData.extraInfo.tripWeight)}</td>
-              <td className="border px-2 py-1">
-                {formatNum(graphData.extraInfo.fuelArm)}
-              </td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.fuelArm)}</td>
               <td className="border px-2 py-1">
                 {formatNum(-graphData.extraInfo.tripWeight * graphData.extraInfo.fuelArm)}
               </td>
@@ -192,11 +194,15 @@ export function OutputTables({ graphData, formData }: OutputTablesProps) {
           <tbody>
             <tr>
               <td className="border px-2 py-1 font-medium">Utility Max. Fuel</td>
-              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.utilityMaxFuel)} Gal</td>
+              <td className="border px-2 py-1">
+                {formatNum(graphData.extraInfo.utilityMaxFuel)} Gal
+              </td>
             </tr>
             <tr>
               <td className="border px-2 py-1 font-medium">Flt. Time to Utility</td>
-              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.timeToUtility)} hrs</td>
+              <td className="border px-2 py-1">
+                {formatNum(graphData.extraInfo.timeToUtility)} hrs
+              </td>
             </tr>
           </tbody>
         </table>
@@ -204,8 +210,12 @@ export function OutputTables({ graphData, formData }: OutputTablesProps) {
       <div className="md:col-span-2 mt-4 flex gap-4 justify-start items-center text-sm font-semibold">
         {graphData.extraInfo.overMTOW && <span className="text-red-600">OVER MTOW</span>}
         {graphData.extraInfo.overMLW && <span className="text-red-600">OVER MLW</span>}
-        {graphData.extraInfo.belowMinDepFuel && <span className="text-red-600">BELOW MIN DEPARTURE FUEL</span>}
-        {graphData.extraInfo.maxFuelInsufficient && <span className="text-red-600">MAX FUEL INSUFFICIENT</span>}
+        {graphData.extraInfo.belowMinDepFuel && (
+          <span className="text-red-600">BELOW MIN DEPARTURE FUEL</span>
+        )}
+        {graphData.extraInfo.maxFuelInsufficient && (
+          <span className="text-red-600">MAX FUEL INSUFFICIENT</span>
+        )}
         {graphData.extraInfo.bag1Over && <span className="text-red-600">BAG 1 OVERWEIGHT</span>}
         {graphData.extraInfo.bag2Over && <span className="text-red-600">BAG 2 OVERWEIGHT</span>}
         {graphData.extraInfo.bagsOver && <span className="text-red-600">BAGS OVERWEIGHT</span>}
