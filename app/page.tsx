@@ -28,7 +28,7 @@ export default function Home() {
     let graphData = calculateGraphData(formData)
     console.log(data)
     console.log(graphData)
-    setData(calculateGraphData(formData))
+    setData(graphData)
   }
 
   return (

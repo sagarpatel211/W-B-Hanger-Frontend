@@ -246,20 +246,30 @@ export function calculateGraphData(formData: FormData): GraphData {
   const density = 6;
   const fuelWeight = fuelLoaded * density;
   const startTaxiFuel = Number(formData.startups) * model.groundFuelRate;
+  const startTaxiWeight = startTaxiFuel * density;
+  const takeoffFuel = fuelLoaded - startTaxiFuel;
+  const takeoffFuelWeight = takeoffFuel * density;
   const tripFuel = Number(formData.flightDuration) * model.fuelRate; // fuelRate = fuelConsumption
+  const tripWeight = tripFuel * density;
   const landingFuel = fuelLoaded - startTaxiFuel - tripFuel;
+  const landingFuelWeight = fuelLoaded - startTaxiFuel - tripFuel;
   const reserveTime = 1;
   const reserveFuel = reserveTime * model.fuelRate;
   const minDepFuel = reserveFuel + startTaxiFuel + tripFuel;
   const endurance = (fuelLoaded - startTaxiFuel) / model.fuelRate;
 
   // WB
+  const FRONT = 0;
+  const REAR = 1;
+  const BAG_1 = 2;
+  const BAG_2 = 3;
+  const FUEL = 4;
   const weight = [
     Number(formData.frontLeft) + Number(formData.frontRight),
     Number(formData.rearLeft) + Number(formData.rearRight),
     Number(formData.bag1),
     Number(formData.bag2),
-    (fuelLoaded - startTaxiFuel) * density,
+    takeoffFuelWeight,
   ];
   const arm = [
     aircraft.frontSeatArm,
@@ -335,19 +345,9 @@ export function calculateGraphData(formData: FormData): GraphData {
   const overMTOW = !normalCat && !utilityCat && takeoffWeight > model.mtow;
   const overMLW = landingWeight > model.mlw;
 
-  const hasPassenger = weight[1] > 0 || weight[2] > 0 || weight[3] > 0; // todo name indices
+  const hasPassenger = weight[REAR] > 0 || weight[BAG_1] > 0 || weight[BAG_2] > 0;
   const noSpin =
     utilityMaxFuel == null ? true : model.noSpin || utilityMaxFuel < reserveFuel || hasPassenger;
-
-  const frontSeatWeight = Number(formData.frontLeft) + Number(formData.frontRight);
-  const rearSeatWeight = Number(formData.rearLeft) + Number(formData.rearRight);
-  const bag1Weight = Number(formData.bag1);
-  const bag2Weight = Number(formData.bag2);
-
-  const frontSeatMoment = frontSeatWeight * aircraft.frontSeatArm;
-  const rearSeatMoment = rearSeatWeight * aircraft.rearSeatArm;
-  const bag1Moment = bag1Weight * aircraft.bag1Arm;
-  const bag2Moment = bag2Weight * aircraft.bag2Arm;
 
   return {
     points: [
@@ -358,12 +358,28 @@ export function calculateGraphData(formData: FormData): GraphData {
     utilityEnvelope: model.utilityCg,
     extraInfo: {
       model,
+	  fuelLoaded,
+	  fuelWeight,
+	  startTaxiFuel,
+	  startTaxiWeight,
+	  takeoffFuel,
+	  takeoffFuelWeight,
+	  tripFuel,
+	  tripWeight,
+	  landingFuel,
+	  landingFuelWeight,
       takeoffWeight,
       landingWeight,
       takeoffArm,
       landingArm,
+	  takeoffMoment,
+	  landingMoment,
+      endurance,
+	  
       va,
       vref,
+	  
+      minDepFuel,
       maxDepFuel,
       maxArm,
       maxWeight,
@@ -371,23 +387,28 @@ export function calculateGraphData(formData: FormData): GraphData {
       utilityMaxArm,
       utilityMaxWeight,
       timeToUtility,
-      belowMinDepFuel,
+
       aircraftWeight: aircraft.weight,
       aircraftMoment: aircraft.moment,
       aircraftArm: aircraft.moment / aircraft.weight,
-      frontSeatWeight,
-      rearSeatWeight,
-      bag1Weight,
-      bag2Weight,
-      frontSeatMoment,
-      rearSeatMoment,
-      bag1Moment,
-      bag2Moment,
+	  
+      frontSeatWeight: weight[FRONT],
+      rearSeatWeight: weight[REAR],
+      bag1Weight: weight[BAG_1],
+      bag2Weight: weight[BAG_2],
+	  
+      frontSeatMoment: weight[FRONT] * arm[FRONT],
+      rearSeatMoment: weight[REAR] * arm[REAR],
+      bag1Moment: weight[BAG_1] * arm[BAG_1],
+      bag2Moment: weight[BAG_2] * arm[BAG_2],
+	  
       frontSeatArm: aircraft.frontSeatArm,
       rearSeatArm: aircraft.rearSeatArm,
       bag1Arm: aircraft.bag1Arm,
       bag2Arm: aircraft.bag2Arm,
       fuelArm: aircraft.fuelArm,
+
+      belowMinDepFuel,
       bag1Over,
       bag2Over,
       bagsOver,
@@ -395,12 +416,8 @@ export function calculateGraphData(formData: FormData): GraphData {
       utilityCat,
       normalCat,
       overMTOW,
-      overMLW: landingWeight > model.mlw,
+      overMLW,
       noSpin,
-      endurance,
-      minDepFuel,
-      takeoffMoment: takeoffMoment,
-      fuelForFlightArm: aircraft.fuelArm,
     },
   };
 }

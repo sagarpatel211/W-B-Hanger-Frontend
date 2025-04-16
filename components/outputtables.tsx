@@ -31,47 +31,8 @@ function formatNum(value: number | undefined | null, digits = 2) {
 }
 
 export function OutputTables({ graphData, formData }: OutputTablesProps) {
-  const {
-    model,
-    takeoffWeight,
-    landingWeight,
-    va,
-    vref,
-    endurance,
-    minDepFuel,
-    maxDepFuel,
-    utilityMaxFuel,
-    timeToUtility,
-    normalCat,
-    noSpin,
-    takeoffArm,
-    landingArm,
-    takeoffMoment,
-  } = graphData.extraInfo;
-
-  // Compute additional weight components from formData
-  const frontSeatWeight = Number(formData.frontLeft) + Number(formData.frontRight);
-  const rearSeatWeight = Number(formData.rearLeft) + Number(formData.rearRight);
-  const baggage1 = Number(formData.bag1);
-  const baggage2 = Number(formData.bag2);
-
-  const density = 6;
-  const fuelLoaded = Number(formData.fuelLoaded);
-  const startups = Number(formData.startups);
-  const flightTime = Number(formData.flightDuration);
-  const startTaxi = startups * model.groundFuelRate;
-  const tripFuel = flightTime * model.fuelRate;
-  const fuelOnLanding = fuelLoaded - startTaxi - tripFuel;
-
-  // Weights
-  const fuelWeight = fuelLoaded * density;
-  const startTaxiWeight = startTaxi * density;
-  const tripFuelWeight = tripFuel * density;
-  const landingFuelWeight = fuelOnLanding * density;
-
-  const fuelForFlight = -tripFuelWeight;
-  const landingMoment = landingArm * landingWeight;
-  const overMLW = landingWeight > model.mlw;
+  const model = graphData.extraInfo.model;
+  const maxDepFuel = graphData.extraInfo.maxDepFuel;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 text-sm">
@@ -87,27 +48,27 @@ export function OutputTables({ graphData, formData }: OutputTablesProps) {
           <tbody>
             <tr>
               <td className="border px-2 py-1">Fuel Loaded</td>
-              <td className="border px-2 py-1">{formatNum(fuelLoaded)}</td>
-              <td className="border px-2 py-1">{formatNum(fuelWeight)}</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.fuelLoaded)}</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.fuelWeight)}</td>
             </tr>
             <tr>
               <td className="border px-2 py-1">Start/Taxi</td>
-              <td className="border px-2 py-1">{formatNum(startTaxi)}</td>
-              <td className="border px-2 py-1">{formatNum(startTaxiWeight)}</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.startTaxiFuel)}</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.startTaxiWeight)}</td>
             </tr>
             <tr>
               <td className="border px-2 py-1">Trip Fuel</td>
-              <td className="border px-2 py-1">{formatNum(tripFuel)}</td>
-              <td className="border px-2 py-1">{formatNum(tripFuelWeight)}</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.tripFuel)}</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.tripWeight)}</td>
             </tr>
             <tr>
               <td className="border px-2 py-1">Fuel on Landing</td>
-              <td className="border px-2 py-1">{formatNum(fuelOnLanding)}</td>
-              <td className="border px-2 py-1">{formatNum(landingFuelWeight)}</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.landingFuel)}</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.landingFuelWeight)}</td>
             </tr>
             <tr className="font-bold">
               <td className="border px-2 py-1">Min Dep. Fuel</td>
-              <td className="border px-2 py-1">{formatNum(minDepFuel)} Gal</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.minDepFuel)} Gal</td>
               <td className="border px-2 py-1"></td>
             </tr>
             <tr className="font-bold">
@@ -120,7 +81,7 @@ export function OutputTables({ graphData, formData }: OutputTablesProps) {
             </tr>
             <tr className="font-bold">
               <td className="border px-2 py-1">Endurance</td>
-              <td className="border px-2 py-1">{formatNum(endurance)} hrs</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.endurance)} hrs</td>
               <td className="border px-2 py-1"></td>
             </tr>
           </tbody>
@@ -169,33 +130,33 @@ export function OutputTables({ graphData, formData }: OutputTablesProps) {
             </tr>
             <tr>
               <td className="border px-2 py-1">Fuel</td>
-              <td className="border px-2 py-1">{formatNum(fuelWeight)}</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.takeoffFuelWeight)}</td>
               <td className="border px-2 py-1">{formatNum(graphData.extraInfo.fuelArm)}</td>
               <td className="border px-2 py-1">
-                {formatNum(fuelWeight * graphData.extraInfo.fuelArm)}
+                {formatNum(graphData.extraInfo.takeoffFuelWeight * graphData.extraInfo.fuelArm)}
               </td>
             </tr>
             <tr className="font-bold bg-gray-100">
               <td className="border px-2 py-1">Takeoff Total</td>
-              <td className="border px-2 py-1">{formatNum(takeoffWeight)}</td>
-              <td className="border px-2 py-1">{formatNum(takeoffArm)}</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.takeoffWeight)}</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.takeoffArm)}</td>
               <td className="border px-2 py-1">{formatNum(graphData.extraInfo.takeoffMoment)}</td>
             </tr>
             <tr>
               <td className="border px-2 py-1">Fuel for Flight</td>
-              <td className="border px-2 py-1">{formatNum(fuelForFlight)}</td>
+              <td className="border px-2 py-1">{formatNum(-graphData.extraInfo.tripWeight)}</td>
               <td className="border px-2 py-1">
-                {formatNum(graphData.extraInfo.fuelForFlightArm)}
+                {formatNum(graphData.extraInfo.fuelArm)}
               </td>
               <td className="border px-2 py-1">
-                {formatNum(fuelForFlight * graphData.extraInfo.fuelForFlightArm)}
+                {formatNum(-graphData.extraInfo.tripWeight * graphData.extraInfo.fuelArm)}
               </td>
             </tr>
             <tr className="font-bold bg-red-100">
               <td className="border px-2 py-1">Landing Totals</td>
-              <td className="border px-2 py-1">{formatNum(landingWeight)}</td>
-              <td className="border px-2 py-1">{formatNum(landingArm)}</td>
-              <td className="border px-2 py-1">{formatNum(landingMoment)}</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.landingWeight)}</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.landingArm)}</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.landingMoment)}</td>
             </tr>
           </tbody>
         </table>
@@ -204,18 +165,18 @@ export function OutputTables({ graphData, formData }: OutputTablesProps) {
         <table className="w-full border border-black border-collapse rounded-lg overflow-hidden">
           <thead className="bg-gray-200">
             <tr>
+              <th className="border px-2 py-1"></th>
               <th className="border px-2 py-1">Speed</th>
-              <th className="border px-2 py-1">Value</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td className="border px-2 py-1 font-medium">Va</td>
-              <td className="border px-2 py-1">{formatNum(va)} KIAS</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.va)} KIAS</td>
             </tr>
             <tr>
               <td className="border px-2 py-1 font-medium">Vref</td>
-              <td className="border px-2 py-1">{formatNum(vref)} KIAS</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.vref)} KIAS</td>
             </tr>
           </tbody>
         </table>
@@ -224,26 +185,33 @@ export function OutputTables({ graphData, formData }: OutputTablesProps) {
         <table className="w-full border border-black border-collapse rounded-lg overflow-hidden">
           <thead className="bg-gray-200">
             <tr>
-              <th className="border px-2 py-1">Utility Info</th>
-              <th className="border px-2 py-1">Value</th>
+              <th className="border px-2 py-1"></th>
+              <th className="border px-2 py-1">Utility</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td className="border px-2 py-1 font-medium">Utility Max. Fuel</td>
-              <td className="border px-2 py-1">{formatNum(utilityMaxFuel)} Gal</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.utilityMaxFuel)} Gal</td>
             </tr>
             <tr>
               <td className="border px-2 py-1 font-medium">Flt. Time to Utility</td>
-              <td className="border px-2 py-1">{formatNum(timeToUtility)} hrs</td>
+              <td className="border px-2 py-1">{formatNum(graphData.extraInfo.timeToUtility)} hrs</td>
             </tr>
           </tbody>
         </table>
       </div>
       <div className="md:col-span-2 mt-4 flex gap-4 justify-start items-center text-sm font-semibold">
-        {overMLW && <span className="text-red-600">OVER MLW</span>}
-        {normalCat && <span className="text-blue-600">NORMAL CATEGORY</span>}
-        {noSpin && <span className="text-red-600">SPINS PROHIBITED</span>}
+        {graphData.extraInfo.overMTOW && <span className="text-red-600">OVER MTOW</span>}
+        {graphData.extraInfo.overMLW && <span className="text-red-600">OVER MLW</span>}
+        {graphData.extraInfo.belowMinDepFuel && <span className="text-red-600">BELOW MIN DEPARTURE FUEL</span>}
+        {graphData.extraInfo.maxFuelInsufficient && <span className="text-red-600">MAX FUEL INSUFFICIENT</span>}
+        {graphData.extraInfo.bag1Over && <span className="text-red-600">BAG 1 OVERWEIGHT</span>}
+        {graphData.extraInfo.bag2Over && <span className="text-red-600">BAG 2 OVERWEIGHT</span>}
+        {graphData.extraInfo.bagsOver && <span className="text-red-600">BAGS OVERWEIGHT</span>}
+        {graphData.extraInfo.normalCat && <span className="text-blue-600">NORMAL CATEGORY</span>}
+        {graphData.extraInfo.utilityCat && <span className="text-green-600">UTILITY CATEGORY</span>}
+        {graphData.extraInfo.noSpin && <span className="text-red-600">SPINS PROHIBITED</span>}
       </div>
     </div>
   );
