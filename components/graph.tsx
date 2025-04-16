@@ -13,9 +13,8 @@ import {
   Scatter,
   TooltipProps,
 } from 'recharts';
-import { Button } from '@/components/ui/button';
 import { GraphData } from '@/lib/math';
-import { savePage } from '@/lib/utils';
+import { useMemo } from 'react';
 
 const NORMAL_COLOUR = 'blue';
 const NORMAL_FILL_COLOUR = 'lightblue';
@@ -33,8 +32,8 @@ type GraphProps = {
 };
 
 export function Graph({ data }: GraphProps) {
-  const tow = data.points?.find((point) => point.name == 'TOW');
-  const elw = data.points?.find((point) => point.name == 'ELW');
+  const tow = useMemo(() => data.points?.find((point) => point.name === 'TOW'), [data.points]);
+  const elw = useMemo(() => data.points?.find((point) => point.name === 'ELW'), [data.points]);
 
   const CustomTooltip = ({ active, payload, label }: TooltipProps<number, number>) => {
     if (active && payload && label) {
@@ -43,18 +42,19 @@ export function Graph({ data }: GraphProps) {
           <p>C.G: {roundTwoDecimals(label)}</p>
           <p style={{ color: NORMAL_COLOUR }}>Normal: {payload[0].value}</p>
           <p style={{ color: UTILITY_COLOUR }}>Utility: {payload[1].value}</p>
-          {label == tow?.x && <p style={{ color: TOW_COLOUR }}>TOW: {tow?.y}</p>}
-          {label == elw?.x && <p style={{ color: ELW_COLOUR }}>ELW: {elw?.y}</p>}
+          {label === tow?.x && <p style={{ color: TOW_COLOUR }}>TOW: {tow?.y}</p>}
+          {label === elw?.x && <p style={{ color: ELW_COLOUR }}>ELW: {elw?.y}</p>}
         </div>
       );
     }
+    return null;
   };
 
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Line Graph</h2>
-      <ResponsiveContainer width="100%" height={400}>
-        <ComposedChart>
+      <ResponsiveContainer width="100%" height={300}>
+        <ComposedChart data={data.points}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             name="GC"
@@ -75,11 +75,7 @@ export function Graph({ data }: GraphProps) {
             domain={['auto', 'auto']}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend
-            wrapperStyle={{
-              paddingTop: '20px',
-            }}
-          />
+          <Legend wrapperStyle={{ paddingTop: '20px' }} />
           <Area
             dataKey="y"
             data={data.normalEnvelope}
@@ -107,10 +103,9 @@ export function Graph({ data }: GraphProps) {
             data={data.points}
           />
           {tow && <Scatter name="TOW" dataKey="y" data={[tow]} fill={TOW_COLOUR} />}
-          {elw && <Scatter name="ELW" dataKey="elw" data={[elw]} fill={ELW_COLOUR} />}
+          {elw && <Scatter name="ELW" dataKey="y" data={[elw]} fill={ELW_COLOUR} />}
         </ComposedChart>
       </ResponsiveContainer>
-      <Button onClick={savePage}>Save Page</Button>
     </div>
   );
 }
