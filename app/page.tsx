@@ -19,7 +19,7 @@ export default function Home() {
     bag1: '0',
     bag2: '0',
     flightDuration: '0',
-    startups: '0',
+    startups: '1',
     fuelConsumption: '0',
     fuelLoaded: '0',
   });

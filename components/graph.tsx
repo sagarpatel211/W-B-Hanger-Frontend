@@ -47,21 +47,6 @@ export function Graph({ data }: GraphProps) {
     [data.utilityEnvelope]
   );
 
-  const CustomTooltip = ({ active, payload, label }: TooltipProps<number, number>) => {
-    if (active && payload && label != null) {
-      return (
-        <div className="border shadow-md bg-white p-4">
-          <p>C.G: {roundTwoDecimals(label)}</p>
-          <p style={{ color: NORMAL_COLOUR }}>Normal: {payload[0]?.value}</p>
-          <p style={{ color: UTILITY_COLOUR }}>Utility: {payload[1]?.value}</p>
-          {label === tow?.x && tow && <p style={{ color: TOW_COLOUR }}>TOW: {tow.y}</p>}
-          {label === elw?.x && elw && <p style={{ color: ELW_COLOUR }}>ELW: {elw.y}</p>}
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
     <div className="overflow-x-auto">
       <h2 className="text-xl font-semibold mb-4">Line Graph</h2>
@@ -88,7 +73,6 @@ export function Graph({ data }: GraphProps) {
                 label={{ value: 'Weight (lbs)', angle: -90, position: 'insideLeft' }}
                 domain={['auto', 'auto']}
               />
-              <Tooltip content={<CustomTooltip />} />
               <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '12px' }} />
 
               {normalStartX != null && (
