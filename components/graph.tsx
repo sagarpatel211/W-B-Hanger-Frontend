@@ -11,7 +11,6 @@ import {
   ResponsiveContainer,
   Legend,
   Scatter,
-  TooltipProps,
   ReferenceLine,
 } from 'recharts';
 import { GraphData } from '@/lib/math';
@@ -47,6 +46,8 @@ export function Graph({ data }: GraphProps) {
     [data.utilityEnvelope]
   );
 
+  const hasUtilityRegion = data.utilityEnvelope?.length > 1;
+
   return (
     <div className="overflow-x-auto">
       <h2 className="text-xl font-semibold mb-4">Line Graph</h2>
@@ -81,10 +82,10 @@ export function Graph({ data }: GraphProps) {
               {normalEndX != null && (
                 <ReferenceLine x={normalEndX} stroke={NORMAL_COLOUR} strokeDasharray="3 3" />
               )}
-              {utilStartX != null && (
+              {hasUtilityRegion && utilStartX != null && (
                 <ReferenceLine x={utilStartX} stroke={UTILITY_COLOUR} strokeDasharray="3 3" />
               )}
-              {utilEndX != null && (
+              {hasUtilityRegion && utilEndX != null && (
                 <ReferenceLine x={utilEndX} stroke={UTILITY_COLOUR} strokeDasharray="3 3" />
               )}
 
@@ -98,16 +99,18 @@ export function Graph({ data }: GraphProps) {
                 fillOpacity={0.4}
                 isAnimationActive={false}
               />
-              <Area
-                dataKey="y"
-                data={data.utilityEnvelope}
-                type="linear"
-                name="Utility Category"
-                stroke={UTILITY_COLOUR}
-                fill={UTILITY_FILL_COLOUR}
-                fillOpacity={0.4}
-                isAnimationActive={false}
-              />
+              {hasUtilityRegion && (
+                <Area
+                  dataKey="y"
+                  data={data.utilityEnvelope}
+                  type="linear"
+                  name="Utility Category"
+                  stroke={UTILITY_COLOUR}
+                  fill={UTILITY_FILL_COLOUR}
+                  fillOpacity={0.4}
+                  isAnimationActive={false}
+                />
+              )}
               <Line
                 dataKey="y"
                 data={data.points}
